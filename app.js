@@ -1,4 +1,5 @@
-
+import dinos from './dino.js';
+    
     // Create Dino Constructor
 
 
