@@ -1,5 +1,6 @@
 import dinos from './dino.js';
     
+
     // Create Dino Constructor
     function Dinosuar(dino){
         this.species = dino.species;
@@ -12,7 +13,20 @@ import dinos from './dino.js';
     }
 
     // Create Dino Objects
-
+    const Dinosaurs = (function(){
+        let dinosaurs = [];
+        dinos['Dinos'].forEach(dino => {
+            dinosaurs.push(dino.species = new Dinosuar(dino));
+            // console.log(dino)
+        });
+    
+        return dinosaurs;
+    })();
+    
+    // Dinosaurs(dinos).forEach(dino => {
+    //     console.log(dino)
+    // });
+    console.log(Dinosaurs);
 
     // Create Human Object
 
