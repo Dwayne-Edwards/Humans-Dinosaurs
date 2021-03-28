@@ -1,7 +1,15 @@
 import dinos from './dino.js';
     
     // Create Dino Constructor
-
+    function Dinosuar(dino){
+        this.species = dino.species;
+        this.weight = dino.weight;
+        this.height = dino.height;
+        this.diet = dino.diet;
+        this.where = dino.where;
+        this.when = dino.when;
+        this.fact = dino.fact;
+    }
 
     // Create Dino Objects
 
