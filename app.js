@@ -2,33 +2,43 @@ import dinos from './dino.js';
     
 
     // Create Dino Constructor
-    function Dinosuar(dino){
-        this.species = dino.species;
-        this.weight = dino.weight;
-        this.height = dino.height;
-        this.diet = dino.diet;
-        this.where = dino.where;
-        this.when = dino.when;
-        this.fact = dino.fact;
+    function Dinosaur (dino){
+        this.species = dino.species || null;
+        this.weight = dino.weight || null;
+        this.height = dino.height || null;
+        this.diet = dino.diet || null;
+        this.where = dino.where || null;
+        this.when = dino.when || null;
+        this.fact = dino.fact || null;
     }
 
     // Create Dino Objects
     const Dinosaurs = (function(){
         let dinosaurs = [];
         dinos['Dinos'].forEach(dino => {
-            dinosaurs.push(dino.species = new Dinosuar(dino));
-            // console.log(dino)
+            dinosaurs.push(dino.species = new Dinosaur(dino));
         });
     
         return dinosaurs;
     })();
     
-    // Dinosaurs(dinos).forEach(dino => {
-    //     console.log(dino)
-    // });
     console.log(Dinosaurs);
 
+    // Create Human Constructor
+    function Human (person){
+        this.name = person.name || null;
+        this.weight = person.weight || null;
+        this.height = person.height || null;
+        this.diet = person.diet || null;
+        this.where = person.where || null;
+        this.when = person.when || null;
+        this.fact = person.fact || null;
+    };
+
     // Create Human Object
+//   function compare(){
+//     alert("COMPARE CLICKED");
+//   }
 
     // Use IIFE to get human data from form
 
