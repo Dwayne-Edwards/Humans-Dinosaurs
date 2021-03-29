@@ -1,6 +1,5 @@
 import dinos from './dino.js';
     
-
     // Create Dino Constructor
     function Dinosaur (dino){
         this.species = dino.species || null;
@@ -12,35 +11,51 @@ import dinos from './dino.js';
         this.fact = dino.fact || null;
     }
 
-    // Create Dino Objects
+    // Create Dino Objects from import dinosuar array of objects
     const Dinosaurs = (function(){
         let dinosaurs = [];
         dinos['Dinos'].forEach(dino => {
-            dinosaurs.push(dino.species = new Dinosaur(dino));
+            dinosaurs.push(new Dinosaur(dino));
         });
     
         return dinosaurs;
     })();
     
-    console.log(Dinosaurs);
 
-    // Create Human Constructor
-    function Human (person){
-        this.name = person.name || null;
-        this.weight = person.weight || null;
-        this.height = person.height || null;
-        this.diet = person.diet || null;
-        this.where = person.where || null;
-        this.when = person.when || null;
-        this.fact = person.fact || null;
-    };
-
-    // Create Human Object
-//   function compare(){
-//     alert("COMPARE CLICKED");
-//   }
+    // Create Human Object and populate properties on click event button is click 
+    let humanData = {};
+   document.getElementById("btn").addEventListener('click', function() {
+        // TODO: add form validation
+        humanData = getHumanData();
+    });
 
     // Use IIFE to get human data from form
+    const getHumanData = (function() {
+        let data = {};
+        return function() {
+            data = {
+                species: "Human",
+                sex:  "Gender",
+                name: document.getElementById("name").value,
+                weight: document.getElementById("weight").value,
+                height: document.getElementById("feet").value,
+                diet: document.getElementById("diet").value
+            }
+        return (data);
+        };
+    })();
+
+    //TODO: Remove this test code 
+  document.getElementById("diet").onclick = function () { 
+    console.log(`Printing the HUMAN DATA NEXT.......`);
+    
+        console.log(humanData);
+        console.log(Dinosaurs); 
+  };
+
+
+
+    
 
 
     // Create Dino Compare Method 1
