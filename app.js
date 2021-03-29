@@ -3,6 +3,7 @@ import dinos from './dino.js';
     // Create Dino Constructor
     function Dinosaur (dino){
         this.species = dino.species || null;
+        this.name = dino.species.slice(0, 4) + dino.diet.slice(0, 5) || null;
         this.weight = dino.weight || null;
         this.height = dino.height || null;
         this.diet = dino.diet || null;
@@ -26,6 +27,9 @@ import dinos from './dino.js';
     let humanData = {};
    document.getElementById("btn").addEventListener('click', function() {
         // TODO: add form validation
+        // TODO: add removeForm Function
+        // TODO: add toggleButton Fuction - use for compare/                                                                v v reset buttons
+
         humanData = getHumanData();
     });
 
