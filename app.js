@@ -2,6 +2,7 @@ import dinos from './dino.js';
     
     // Create Dino Constructor
     function Dinosaur (dino){
+        let comparison = "Comparison";
         this.species = dino.species || null;
         this.name = dino.species.slice(0, 4) + dino.diet.slice(0, 5) || null;
         this.weight = dino.weight || null;
@@ -10,6 +11,12 @@ import dinos from './dino.js';
         this.where = dino.where || null;
         this.when = dino.when || null;
         this.fact = dino.fact || null;
+        this.setComparisonToHuman = function(set){
+            comparison = set;
+        }
+        this.getComparison = function(){
+            return comparison;
+        }
     }
 
     // Create Dino Objects from import dinosuar array of objects
@@ -28,9 +35,10 @@ import dinos from './dino.js';
    document.getElementById("btn").addEventListener('click', function() {
         // TODO: add form validation
         // TODO: add removeForm Function
-        // TODO: add toggleButton Fuction - use for compare/                                                                v v reset buttons
+        // TODO: add toggleButton Fuction - use for compare/reset buttons
 
         humanData = getHumanData();
+        Dinosaurs[3].setComparison("Goodness")
     });
 
     // Use IIFE to get human data from form
@@ -39,7 +47,6 @@ import dinos from './dino.js';
         return function() {
             data = {
                 species: "Human",
-                sex:  "Gender",
                 name: document.getElementById("name").value,
                 weight: document.getElementById("weight").value,
                 height: document.getElementById("feet").value,
@@ -55,12 +62,16 @@ import dinos from './dino.js';
     
         console.log(humanData);
         console.log(Dinosaurs); 
+        console.log(Dinosaurs[3].getComparison());
   };
 
 
 
     
+    const makeComparison = function (obj1, obj2, property='species'){
+        // filter by property type
 
+    }
 
     // Create Dino Compare Method 1
     // NOTE: Weight in JSON file is in lbs, height in inches. 
