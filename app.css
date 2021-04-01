@@ -149,6 +149,15 @@ input {
     box-sizing: border-box;
 }
 
+.form-field__units{
+    margin-top: 40px;
+    width: 20px;
+    height: 20px;
+}
+
+.label_units{
+    padding-left: 10px;
+}
 select {
     display: block;
 }

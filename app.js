@@ -135,11 +135,6 @@ import dinos from './dino.js';
                     }
                     
                 default:
-                    let fact = Math.floor(Math.random() * 5)
-                    let when = Math.floor(Math.random() * 5)
-                    comparison = fact > when ? `Quick ${obj1.species} fact: ${obj1.fact}` : `${obj1.species} lived during the ${obj1.when} period`;
-                    
-                    previouslyUsedKeys.push(objectKey);
                     break;
             }
         } else {
