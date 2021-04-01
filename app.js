@@ -51,7 +51,7 @@ import dinos from './dino.js';
                 weight: document.getElementById("weight").value,
                 height: document.getElementById("feet").value,
                 diet: document.getElementById("diet").value,
-                // where: document.getElementById("where").value
+                where: document.getElementById("where").value
             }
         return data;
         };
