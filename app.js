@@ -2,9 +2,9 @@ import dinos from './dino.js';
     
     // Create Dino Constructor
     function Dinosaur (dino){
-        let comparison = "Comparison";
+        let comparison = null;
         this.species = dino.species || null;
-        this.name = dino.species.slice(0, 4) + dino.diet.slice(0, 5) || null;
+        this.name = dino.species || null;
         this.weight = dino.weight || null;
         this.height = dino.height || null;
         this.diet = dino.diet || null;
@@ -65,12 +65,9 @@ import dinos from './dino.js';
         console.log(Dinosaurs); 
         console.log(Dinosaurs[3].getComparison());
         console.log(isValidKey('height'));
-        console.log(makeComparison(Dinosaurs[5], humanData, 'name'));
+        console.log(makeComparison(Dinosaurs[3], humanData, 'name'));
     
   };
-
-
-
 
 
     
@@ -165,7 +162,7 @@ import dinos from './dino.js';
     }
 
     function convertToString(str){
-    return str.toString();
+        return str.toString();
     }
 
     //   function isString(str){
