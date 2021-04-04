@@ -156,7 +156,8 @@ input {
 }
 
 .label_units{
-    padding-left: 10px;
+    padding-left: 20px;
+    /* display: inline-block; */
 }
 select {
     display: block;

@@ -49,7 +49,7 @@ import dinos from './dino.js';
                 species: "Human",
                 name: document.getElementById("name").value,
                 weight: document.getElementById("weight").value,
-                height: document.getElementById("feet").value,
+                height: [parseInt(document.getElementById("feet").value), parseInt(document.getElementById("inches").value)],
                 diet: document.getElementById("diet").value,
                 where: document.getElementById("where").value
             }
@@ -66,10 +66,67 @@ import dinos from './dino.js';
         console.log(Dinosaurs[3].getComparison());
         console.log(isValidKey('height'));
         console.log(makeComparison(Dinosaurs[3], humanData, 'name'));
+        console.log(getMeasurements(humanData.height, humanData.weight, 'imperial'))
     
   };
+  document.getElementById("unit").onclick = function () { 
+        let unit = 'imperial'
+        let value = document.getElementById("unit").value;
+        if(value === unit){
+            unit = 'metric'
+            document.getElementById("unit").value = 'metric';
+            document.getElementById("label_units").innerText = 'Switch to Imperial';
+            document.getElementById("heightA").innerText = 'Meters: ';
+            document.getElementById("heightB").innerText = 'Centimeters: ';
+            document.getElementById("label_weight").innerText = 'Kgs';
+        } else {
+            unit = 'imperial'
+            document.getElementById("unit").value = 'imperial';
+            document.getElementById("label_units").innerText = 'Switch to Metric';
+            document.getElementById("heightA").innerText = 'Feet: ';
+            document.getElementById("heightB").innerText = 'Inches: ';
+            document.getElementById("label_weight").innerText = 'lbs';
+            
+        }
+  };
 
+function getMeasurements(height, weight, unit = document.getElementById("unit").value){
+    let  measurement = {};
 
+    function convertToMetric(){
+        let heightInCM = ((height[0] * 12) + height[1]) / 39.37;
+        let m = Math.floor(heightInCM / 100);
+        let cm = Math.floor(heightInCM % 100);
+        let kg = weight / 2.205;
+        measurement = {
+            unit: 'metric',
+            heightA: m,
+            heightB: cm,
+            weight: kg
+        }
+    }
+    function convertToImperial(){
+        let heightInInches = ((height[0] * 12) + height[1]) * 0.0254;
+        let feet = Math.floor(heightInInches / 12);
+        let inches = Math.floor(heightInInches % 12);
+        let lbs = weight * 2.205;
+        measurement = {
+            unit: 'imperial',
+            heightA: feet,
+            heightB: inches,
+            weight: lbs
+        }
+    }
+    
+    if(unit !== 'imperial'){
+        convertToMetric();
+        return measurement;
+    } else if(unit)
+    convertToImperial();
+        // return measurement;
+    
+     
+}
     
     const makeComparison = function (obj1, obj2, objectKey, comparisonUnit){
         let previouslyUsedKeys = [];
@@ -101,8 +158,8 @@ import dinos from './dino.js';
                     if(typeof obj1Value === "number"){obj1Value = convertToString(obj1Value);}
                     if(typeof obj2Value === "number"){obj2Value = convertToString(obj2Value);}
                     
-                    if(obj1[objectKey].toLowerCase() === obj2[objectKey].toLowerCase() 
-                    || obj1[objectKey].toLowerCase().includes(obj2[objectKey].toLowerCase())){
+                    if(obj1Value.toLowerCase() === obj2Value.toLowerCase() 
+                    || obj1Value.toLowerCase().includes(obj2Value.toLowerCase())){
                         comparison = objectKey === 'diet' ? `${obj1.name} and ${obj2.name} are both ${obj2.diet}` 
                         : `${obj1.name} and ${obj2.name} have ${obj1.where} in common`
                         
@@ -116,12 +173,14 @@ import dinos from './dino.js';
                     break;
                 
                 case 'name':
-                    if(convertToString(obj1Value).toLowerCase() < convertToString(obj2Value).toLowerCase()){
+                    if(typeof obj1Value === "number"){obj1Value = convertToString(obj1Value);}
+                    if(typeof obj2Value === "number"){obj2Value = convertToString(obj2Value);}
+                    if(obj1Value .toLowerCase() < obj2Value.toLowerCase()){
                         comparison = `${obj1.name} name would come before ${obj2.name} in a list`;
                         
                         previouslyUsedKeys.push(objectKey); 
                         break;
-                    } else if(convertToString(obj1Value).toLowerCase() > convertToString(obj2Value).toLowerCase()){
+                    } else if(obj1Value .toLowerCase() > obj2Value .toLowerCase()){
                         comparison = `${obj2.name} name would come before ${obj1.name} in a list`; 
 
                         previouslyUsedKeys.push(objectKey); 
@@ -153,10 +212,12 @@ import dinos from './dino.js';
 
     }
     function convertToInteger(n){
+        
         return parseInt(n);
     }
 
     function convertToString(str){
+        if(!str){return};
         return str.toString();
     }
 
