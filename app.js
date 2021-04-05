@@ -1,132 +1,122 @@
 import dinos from './dino.js';
     
-    // Create Dino Constructor
-    function Dinosaur (dino){
-        let comparison = null;
-        this.species = dino.species || null;
-        this.name = dino.species || null;
-        this.weight = dino.weight || null;
-        this.height = dino.height || null;
-        this.diet = dino.diet || null;
-        this.where = dino.where || null;
-        this.when = dino.when || null;
-        this.fact = dino.fact || null;
-        this.setComparisonToHuman = function(set){
-            comparison = set;
-        }
-        this.getComparison = function(){
-            return comparison;
-        }
+// Create Dino Constructor
+function Dinosaur (dino){
+    let comparison = null;
+    this.species = dino.species || null;
+    this.name = dino.species || null;
+    this.weight = dino.weight || null;
+    this.height = dino.height || null;
+    this.diet = dino.diet || null;
+    this.where = dino.where || null;
+    this.when = dino.when || null;
+    this.fact = dino.fact || null;
+    this.setComparisonToHuman = function(set){
+        comparison = set;
     }
+    this.getComparison = function(){
+        return comparison;
+    }
+}
 
-    // Create Dino Objects from import dinosuar array of objects
-    const Dinosaurs = (function(){
-        let dinosaurs = [];
-        dinos['Dinos'].forEach(dino => {
-            dinosaurs.push(new Dinosaur(dino));
-        });
-    
-        return dinosaurs;
-    })();
-    
-
-    // Create Human Object and populate properties when [compare button] is clicked 
-    let humanData = {};
-   document.getElementById("btn").addEventListener('click', function() {
-        // TODO: add form validation
-        // TODO: add removeForm Function
-        // TODO: add toggleButton Fuction - use for compare/reset buttons
-
-        humanData = getHumanData();
-        Dinosaurs[3].setComparisonToHuman("Goodness")
+// Create Dino Objects from import dinosuar array of objects
+const Dinosaurs = (function(){
+    let dinosaurs = [];
+    dinos['Dinos'].forEach(dino => {
+        dinosaurs.push(new Dinosaur(dino));
     });
 
-    // Use IIFE to get human data from form
-    const getHumanData = (function() {
-        let data = {};
-        return function() {
-            data = {
-                species: "Human",
-                name: document.getElementById("name").value,
-                weight: document.getElementById("weight").value,
-                height: [parseInt(document.getElementById("feet").value), parseInt(document.getElementById("inches").value)],
-                diet: document.getElementById("diet").value,
-                where: document.getElementById("where").value
-            }
-        return data;
-        };
-    })();
-
-    //TODO: Remove this test code 
-  document.getElementById("diet").onclick = function () { 
-    console.log(`Printing the HUMAN DATA NEXT.......`);
+    return dinosaurs;
+})();
     
-        console.log(humanData);
-        console.log(Dinosaurs); 
-        console.log(Dinosaurs[3].getComparison());
-        console.log(isValidKey('height'));
-        console.log(makeComparison(Dinosaurs[3], humanData, 'name'));
-        console.log(getMeasurements(humanData.height, humanData.weight, 'imperial'))
-    
-  };
-  document.getElementById("unit").onclick = function () { 
-        let unit = 'imperial'
-        let value = document.getElementById("unit").value;
-        if(value === unit){
-            unit = 'metric'
-            document.getElementById("unit").value = 'metric';
-            document.getElementById("label_units").innerText = 'Switch to Imperial';
-            document.getElementById("heightA").innerText = 'Meters: ';
-            document.getElementById("heightB").innerText = 'Centimeters: ';
-            document.getElementById("label_weight").innerText = 'Kgs';
-        } else {
-            unit = 'imperial'
-            document.getElementById("unit").value = 'imperial';
-            document.getElementById("label_units").innerText = 'Switch to Metric';
-            document.getElementById("heightA").innerText = 'Feet: ';
-            document.getElementById("heightB").innerText = 'Inches: ';
-            document.getElementById("label_weight").innerText = 'lbs';
-            
-        }
-  };
 
-function getMeasurements(height, weight, unit = document.getElementById("unit").value){
-    let  measurement = {};
+// Create Human Object and populate properties when [compare button] is clicked 
+let humanData = {};
+document.getElementById("btn").addEventListener('click', function() {
+    // TODO: add form validation
+    // TODO: add removeForm Function
+    // TODO: add toggleButton Fuction - use for compare/reset buttons
 
-    function convertToMetric(){
-        let heightInCM = ((height[0] * 12) + height[1]) / 39.37;
-        let m = Math.floor(heightInCM / 100);
-        let cm = Math.floor(heightInCM % 100);
-        let kg = weight / 2.205;
-        measurement = {
-            unit: 'metric',
-            heightA: m,
-            heightB: cm,
-            weight: kg
+    humanData = getHumanData();
+    Dinosaurs[3].setComparisonToHuman("Goodness")
+});
+
+// Use IIFE to get human data from form
+const getHumanData = (function() {
+    let data = {};
+    return function() {
+        data = {
+            species: "Human",
+            name: document.getElementById("name").value,
+            weight: document.getElementById("weight").value,
+            height: [parseInt(document.getElementById("feet").value), parseInt(document.getElementById("inches").value)],
+            diet: document.getElementById("diet").value,
+            where: document.getElementById("where").value
         }
-    }
-    function convertToImperial(){
-        let heightInInches = ((height[0] * 12) + height[1]) * 0.0254;
-        let feet = Math.floor(heightInInches / 12);
-        let inches = Math.floor(heightInInches % 12);
-        let lbs = weight * 2.205;
-        measurement = {
-            unit: 'imperial',
-            heightA: feet,
-            heightB: inches,
-            weight: lbs
-        }
+    return data;
+    };
+})();
+
+
+document.getElementById("unit").onclick = () => {
+    toggleUnitsAndValues()
+};
+
+function toggleUnitsAndValues(unit = getUnit()){
+    let h1 = document.getElementById("feet").value || 0;
+    let h2 = document.getElementById("inches").value || 0;
+    let height = 0;
+
+    if(unit === 'imperial'){
+        height = parseInt(h1, 10) * 12 + parseInt(h2, 10); 
+    } else {
+    height = parseInt(h1, 10) * 100 + parseInt(h2, 10);
     }
     
-    if(unit !== 'imperial'){
-        convertToMetric();
-        return measurement;
-    } else if(unit)
-    convertToImperial();
-        // return measurement;
+    let convertedHeight = convertHeight(height, unit)
+    let weight = document.getElementById("weight").value;
     
-     
+    updateFormMeasurements(convertedHeight, weight);
+    updateFormDisplayUnits(getUnit());
+    
 }
+
+
+function updateFormMeasurements(height, weight, unit = getUnit()) { 
+    let isImperial = unit === 'imperial';
+    document.getElementById("feet").value = isImperial ? Math.floor(height / 100) : Math.floor(height / 12);
+    document.getElementById("inches").value = isImperial ?  Math.floor(height % 100) : Math.floor(height % 12);
+    document.getElementById("weight").value = isImperial ?  Math.round(weight / 2.203) : Math.round(weight * 2.203);
+};
+
+
+//   Toggle the form's displayed units and update for unit checkbox value   
+function updateFormDisplayUnits(unit = getUnit()) { 
+    let isNotImperial = unit !== 'imperial';
+    document.getElementById("unit").value = isNotImperial ? 'imperial' : 'metric';
+    document.getElementById("label_units").innerText = isNotImperial ? 'Switch to metric': 'Uncheck for imperial';
+    document.getElementById("heightA").innerText = isNotImperial ? 'Feet: ': 'Meters: ';
+    document.getElementById("heightB").innerText = isNotImperial ? 'inches: ' : 'Cm: ';
+    document.getElementById("label_weight").innerText = isNotImperial ? 'lbs' : 'Kgs';
+
+};
+
+function getUnit(){
+    return document.getElementById("unit").value;
+}
+
+function convertHeight(height, unit = getUnit()){
+    if(unit === 'imperial'){
+        return Math.round(height * 2.54)
+    } 
+    return Math.round(height / 2.54);
+}
+
+function getMeasurements(){
+
+}
+
+    
     
     const makeComparison = function (obj1, obj2, objectKey, comparisonUnit){
         let previouslyUsedKeys = [];
@@ -241,7 +231,10 @@ function getMeasurements(height, weight, unit = document.getElementById("unit").
 
 
     // Generate Tiles for each Dino in Array
-  
+
+
+
+
     // Add tiles to DOM
 
     // Remove form from screen
