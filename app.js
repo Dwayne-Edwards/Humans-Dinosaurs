@@ -232,7 +232,31 @@ function getMeasurements(){
 
     // Generate Tiles for each Dino in Array
 
-
+    function generateTileGrid(species, human){
+        //   save 
+        
+    
+    }    
+    
+    let dinoArray = [1,2,3,4,5,6,7,8];
+    dinoArray = shuffleArray(dinoArray);
+    console.log(arrayMiddleInsert(dinoArray));
+    
+    // Insert an item in the middle of an array of any length
+    function arrayMiddleInsert(array, middleItem){
+        let middle = Math.floor(array.length / 2);
+        array.splice(middle, 0, middleItem);
+        return array;
+    }
+    
+    // Shuffle an array of any length
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array
+    }
 
 
     // Add tiles to DOM
