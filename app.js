@@ -32,15 +32,6 @@ const Dinosaurs = (function(){
 
 // Create Human Object and populate properties when [compare button] is clicked 
 let humanData = {};
-document.getElementById("btn").addEventListener('click', function() {
-    // TODO: add form validation
-    // TODO: add removeForm Function
-    // TODO: add toggleButton Fuction - use for compare/reset buttons
-
-    humanData = getHumanData();
-    Dinosaurs[3].setComparisonToHuman("Goodness")
-});
-
 // Use IIFE to get human data from form
 const getHumanData = (function() {
     let data = {};
@@ -56,6 +47,17 @@ const getHumanData = (function() {
     return data;
     };
 })();
+
+
+document.getElementById("btn").addEventListener('click', function() {
+    // TODO: add form validation
+    // TODO: add removeForm Function
+    // TODO: add toggleButton Fuction - use for compare/reset buttons
+
+    humanData = getHumanData();
+    // Dinosaurs[3].setComparisonToHuman("Goodness")
+    generateTileGrid(Dinosaurs, humanData)
+});
 
 
 document.getElementById("unit").onclick = () => {
@@ -231,17 +233,33 @@ function getMeasurements(){
 
 
     // Generate Tiles for each Dino in Array
+  
+    function generateTileGrid(dino, human){
 
-    function generateTileGrid(species, human){
-        //   save 
-        
-    
-    }    
-    
-    let dinoArray = [1,2,3,4,5,6,7,8];
-    dinoArray = shuffleArray(dinoArray);
-    console.log(arrayMiddleInsert(dinoArray));
-    
+    let items = arrayMiddleInsert(shuffleArray(dino), human);
+    items.forEach(item => {
+            // create a new div element
+            const gridItem = document.createElement("div");
+            
+            gridItem.id = "grid-item"
+            gridItem.className = "grid-item";
+            // and give it some content
+
+            const gridItemTitle = document.createTextNode(`Species: ${item.name || item.species}`);
+            const gridItemImage = document.createElement("img");
+            gridItemImage.src = `/images/${item.species.toLowerCase()}.png`;
+          
+            // add the text node to the newly created div
+            gridItem.appendChild(gridItemTitle);
+            gridItem.appendChild(gridItemImage);
+          
+            // add the newly created element and its content into the DOM
+            const currentDiv = document.getElementById("div1");
+            document.getElementById('grid').appendChild(gridItem);
+         
+    })
+} 
+
     // Insert an item in the middle of an array of any length
     function arrayMiddleInsert(array, middleItem){
         let middle = Math.floor(array.length / 2);
