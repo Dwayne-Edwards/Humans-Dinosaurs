@@ -29,7 +29,7 @@ const Dinosaurs = (function(){
     return dinosaurs;
 })();
     
-
+// Create store all DOM elements in a object to simplify interactions 
 // Create Human Object and populate properties when [compare button] is clicked 
 let humanData = {};
 // Use IIFE to get human data from form
@@ -49,19 +49,36 @@ const getHumanData = (function() {
 })();
 
 
-document.getElementById("btn").addEventListener('click', function() {
-    // TODO: add form validation
-    // TODO: add removeForm Function
-    // TODO: add toggleButton Fuction - use for compare/reset buttons
 
-    humanData = getHumanData();
-    // Dinosaurs[3].setComparisonToHuman("Goodness")
-    generateTileGrid(Dinosaurs, humanData)
-});
 
 
 document.getElementById("unit").onclick = () => {
     toggleUnitsAndValues()
+};
+
+// Returns the current state of the form units in use
+function getUnit(){
+    return document.getElementById("unit").value;
+}
+
+
+function updateFormMeasurements(height, weight, unit = getUnit()) { 
+    let isImperial = unit === 'imperial';
+    document.getElementById("feet").value = isImperial ? Math.floor(height / 100) : Math.floor(height / 12);
+    document.getElementById("inches").value = isImperial ?  Math.floor(height % 100) : Math.floor(height % 12);
+    document.getElementById("weight").value = isImperial ?  Math.round(weight / 2.203) : Math.round(weight * 2.203);
+};
+
+
+//   Toggle the form's displayed units and update the [unit] checkbox value   
+function updateFormDisplayUnits(unit = getUnit()) { 
+    let isNotImperial = unit !== 'imperial';
+    document.getElementById("unit").value = isNotImperial ? 'imperial' : 'metric';
+    document.getElementById("label_units").innerText = isNotImperial ? 'Switch to metric': 'Uncheck for imperial';
+    document.getElementById("heightA").innerText = isNotImperial ? 'Feet: ': 'Meters: ';
+    document.getElementById("heightB").innerText = isNotImperial ? 'inches: ' : 'Cm: ';
+    document.getElementById("label_weight").innerText = isNotImperial ? 'lbs' : 'Kgs';
+
 };
 
 function toggleUnitsAndValues(unit = getUnit()){
@@ -84,28 +101,6 @@ function toggleUnitsAndValues(unit = getUnit()){
 }
 
 
-function updateFormMeasurements(height, weight, unit = getUnit()) { 
-    let isImperial = unit === 'imperial';
-    document.getElementById("feet").value = isImperial ? Math.floor(height / 100) : Math.floor(height / 12);
-    document.getElementById("inches").value = isImperial ?  Math.floor(height % 100) : Math.floor(height % 12);
-    document.getElementById("weight").value = isImperial ?  Math.round(weight / 2.203) : Math.round(weight * 2.203);
-};
-
-
-//   Toggle the form's displayed units and update for unit checkbox value   
-function updateFormDisplayUnits(unit = getUnit()) { 
-    let isNotImperial = unit !== 'imperial';
-    document.getElementById("unit").value = isNotImperial ? 'imperial' : 'metric';
-    document.getElementById("label_units").innerText = isNotImperial ? 'Switch to metric': 'Uncheck for imperial';
-    document.getElementById("heightA").innerText = isNotImperial ? 'Feet: ': 'Meters: ';
-    document.getElementById("heightB").innerText = isNotImperial ? 'inches: ' : 'Cm: ';
-    document.getElementById("label_weight").innerText = isNotImperial ? 'lbs' : 'Kgs';
-
-};
-
-function getUnit(){
-    return document.getElementById("unit").value;
-}
 
 function convertHeight(height, unit = getUnit()){
     if(unit === 'imperial'){
@@ -114,112 +109,104 @@ function convertHeight(height, unit = getUnit()){
     return Math.round(height / 2.54);
 }
 
-function getMeasurements(){
-
+// Helper functions
+function isValidKey(key, validKeys = Object.keys(getHumanData())){
+    return validKeys.includes(key);
+}
+function convertToInteger(n){
+    if(!n){return};
+    return parseInt(n);
 }
 
+function convertToString(str){
+    if(!str){return};
+    return str.toString();
+}
     
     
-    const makeComparison = function (obj1, obj2, objectKey, comparisonUnit){
-        let previouslyUsedKeys = [];
-        let comparison = '';
-        let obj1Value = obj1[objectKey];
-        let obj2Value = obj2[objectKey];
-        
-        if(isValidKey(objectKey) && !previouslyUsedKeys.includes(objectKey)){
-            switch(objectKey){
-                case 'height':
-                case 'weight':
-                    if(typeof obj1Value === "string"){obj1Value = convertToInteger(obj1Value);}
-                    if(typeof obj2Value === "string"){obj2Value = convertToInteger(obj2Value);} 
-                    if(obj1Value > obj2Value){
-                        comparison = `The ${objectKey} of ${obj1.name} is about 
-                        ${obj1.height - obj2.height} ${comparisonUnit} more than ${obj2.name}`
-                        
-                        previouslyUsedKeys.push(objectKey);
-                        break;
-                    }
+const makeComparison = function (obj1, obj2, objectKey, comparisonUnit = getUnit()){
+    let previouslyUsedKeys = [];
+    let comparison = '';
+    let obj1Value = obj1[objectKey];
+    let obj2Value = obj2[objectKey];
+    let unit;
+    if(objectKey === 'height'){
+        unit = comparisonUnit === 'imperial' ? 'inches' : 'centimeters';
+    } else if(objectKey === 'weight'){
+        unit = comparisonUnit === 'imperial' ? 'lbs' : 'kgs';
+    }
+    if(isValidKey(objectKey) && !previouslyUsedKeys.includes(objectKey)){
+        switch(objectKey){
+            case 'height':
+            case 'weight':
+                if(typeof obj1Value === "string"){obj1Value = convertToInteger(obj1Value);}
+                if(typeof obj2Value === "string"){obj2Value = convertToInteger(obj2Value);} 
+                if(obj1Value > obj2Value){
                     comparison = `The ${objectKey} of ${obj1.name} is about 
-                    ${obj2.height - obj1.height} ${comparisonUnit} less than ${obj2.name}`
+                    ${obj1.height - obj2.height} ${unit} more than ${obj2.name}`
                     
                     previouslyUsedKeys.push(objectKey);
                     break;
+                }
+                comparison = `The ${objectKey} of ${obj1.name} is about 
+                ${obj2.height - obj1.height} ${unit} less than ${obj2.name}`
                 
-                case 'diet':
-                case 'where':
-                    if(typeof obj1Value === "number"){obj1Value = convertToString(obj1Value);}
-                    if(typeof obj2Value === "number"){obj2Value = convertToString(obj2Value);}
+                previouslyUsedKeys.push(objectKey);
+                break;
+            
+            case 'diet':
+            case 'where':
+                if(typeof obj1Value === "number"){obj1Value = convertToString(obj1Value);}
+                if(typeof obj2Value === "number"){obj2Value = convertToString(obj2Value);}
+                
+                if(obj1Value.toLowerCase() === obj2Value.toLowerCase() 
+                || obj1Value.toLowerCase().includes(obj2Value.toLowerCase())){
+                    comparison = objectKey === 'diet' ? `${obj1.name} and ${obj2.name} are both ${obj2.diet}` 
+                    : `${obj1.name} and ${obj2.name} have ${obj1.where} in common`
                     
-                    if(obj1Value.toLowerCase() === obj2Value.toLowerCase() 
-                    || obj1Value.toLowerCase().includes(obj2Value.toLowerCase())){
-                        comparison = objectKey === 'diet' ? `${obj1.name} and ${obj2.name} are both ${obj2.diet}` 
-                        : `${obj1.name} and ${obj2.name} have ${obj1.where} in common`
-                        
-                        previouslyUsedKeys.push(objectKey);
-                        break;
-                    }
-                    comparison = objectKey === 'diet' ? `${obj1.name} is a ${obj1.diet} unlike ${obj2.name} the ${obj2.diet}`
-                    : `${obj1.name} were found in ${obj1.where} and ${obj2.name} location is ${obj2.where}`
-                   
-                    previouslyUsedKeys.push(objectKey);  
+                    previouslyUsedKeys.push(objectKey);
                     break;
+                }
+                comparison = objectKey === 'diet' ? `${obj1.name} is a ${obj1.diet} unlike ${obj2.name} the ${obj2.diet}`
+                : `${obj1.name} are found in ${obj1.where} and ${obj2.name} location is ${obj2.where}`
                 
-                case 'name':
-                    if(typeof obj1Value === "number"){obj1Value = convertToString(obj1Value);}
-                    if(typeof obj2Value === "number"){obj2Value = convertToString(obj2Value);}
-                    if(obj1Value .toLowerCase() < obj2Value.toLowerCase()){
-                        comparison = `${obj1.name} name would come before ${obj2.name} in a list`;
-                        
-                        previouslyUsedKeys.push(objectKey); 
-                        break;
-                    } else if(obj1Value .toLowerCase() > obj2Value .toLowerCase()){
-                        comparison = `${obj2.name} name would come before ${obj1.name} in a list`; 
+                previouslyUsedKeys.push(objectKey);  
+                break;
+            
+            case 'name':
+                if(typeof obj1Value === "number"){obj1Value = convertToString(obj1Value);}
+                if(typeof obj2Value === "number"){obj2Value = convertToString(obj2Value);}
+                if(obj1Value .toLowerCase() < obj2Value.toLowerCase()){
+                    comparison = `${obj1.name} name would come before ${obj2.name} in a list`;
+                    
+                    previouslyUsedKeys.push(objectKey); 
+                    break;
+                } else if(obj1Value .toLowerCase() > obj2Value .toLowerCase()){
+                    comparison = `${obj2.name} name would come before ${obj1.name} in a list`; 
 
-                        previouslyUsedKeys.push(objectKey); 
-                        break;
-                    } else {
-                        comparison = (obj1.name).length > (obj2.name).length ? `${obj1.name} name is longer than ${obj2.name}`
-                        : `${obj1.name} name is not longer than ${obj2.name}`;
-                        
-                        previouslyUsedKeys.push(objectKey);
-                        break;
-                    }
-                    
-                default:
+                    previouslyUsedKeys.push(objectKey); 
                     break;
-            }
-        } else {
-            let fact = Math.floor(Math.random() * 5)
-            let when = Math.floor(Math.random() * 5)
-            comparison = fact > when ? `[ ${obj1.species} ]?: ${obj1.fact}` : `[ ${obj1.species} ]?: lived during the ${obj1.when} period`;
+                } else {
+                    comparison = (obj1.name).length > (obj2.name).length ? `${obj1.name} name is longer than ${obj2.name}`
+                    : `${obj1.name} name is not longer than ${obj2.name}`;
                     
-            previouslyUsedKeys.push(objectKey);
+                    previouslyUsedKeys.push(objectKey);
+                    break;
+                }
+                
+            default:
+                break;
         }
-        return comparison;
-    };
-
-    // Helper functions
-    function isValidKey(key, validKeys = Object.keys(getHumanData())){
-        return validKeys.includes(key);
-
+    } else {
+        let fact = Math.floor(Math.random() * 5)
+        let when = Math.floor(Math.random() * 5)
+        comparison = fact > when ? `${obj1.species} fact:  ${obj1.fact}` : `${obj1.species} lived during the ${obj1.when} period`;
+                
+        previouslyUsedKeys.push(objectKey);
     }
-    function convertToInteger(n){
-        
-        return parseInt(n);
-    }
+    return comparison;
+};
 
-    function convertToString(str){
-        if(!str){return};
-        return str.toString();
-    }
-
-    //   function isString(str){
-    //       return typeof str === "string";
-    //   }
-
-    //   function isNumber(n){
-    //     return typeof n === "number";
-    // }
 
     // Create Dino Compare Method 1
     // NOTE: Weight in JSON file is in lbs, height in inches. 
@@ -232,12 +219,39 @@ function getMeasurements(){
     // NOTE: Weight in JSON file is in lbs, height in inches.
 
 
-    // Generate Tiles for each Dino in Array
-  
-    function generateTileGrid(dino, human){
+    
+    // Insert an item in the middle of an array of any length
+function arrayMiddleInsert(array, middleItem){
+    let middle = Math.floor(array.length / 2);
+    array.splice(middle, 0, middleItem);
+    return array;
+}
 
+    // Shuffle an array of any length
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array
+} 
+
+
+
+    // Generate Tiles for each Dino in Array
+function generateTileGrid(dino, human){
+    let keys = shuffleArray(Object.keys(dino[0]));
     let items = arrayMiddleInsert(shuffleArray(dino), human);
     items.forEach(item => {
+        if(item instanceof Dinosaur){
+            // TODO: Check for pigeon object
+            let key = keys.pop();
+            item.setComparisonToHuman(makeComparison(item, human, keys.pop()));
+            console.log(item.getComparison());
+        }
+        
+        
+
             // create a new div element
             const gridItem = document.createElement("div");
             
@@ -245,7 +259,7 @@ function getMeasurements(){
             gridItem.className = "grid-item";
             // and give it some content
 
-            const gridItemTitle = document.createTextNode(`Species: ${item.name || item.species}`);
+            const gridItemTitle = document.createTextNode(`Species: ${item.name|| item.species }`);
             const gridItemImage = document.createElement("img");
             gridItemImage.src = `/images/${item.species.toLowerCase()}.png`;
           
@@ -254,32 +268,32 @@ function getMeasurements(){
             gridItem.appendChild(gridItemImage);
           
             // add the newly created element and its content into the DOM
-            const currentDiv = document.getElementById("div1");
             document.getElementById('grid').appendChild(gridItem);
          
     })
 } 
 
-    // Insert an item in the middle of an array of any length
-    function arrayMiddleInsert(array, middleItem){
-        let middle = Math.floor(array.length / 2);
-        array.splice(middle, 0, middleItem);
-        return array;
-    }
-    
-    // Shuffle an array of any length
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array
-    }
+ 
 
 
     // Add tiles to DOM
 
-    // Remove form from screen
+    // Toggle HTML Element diplay property
+function toggleElement(element){
+    element.style.display === 'none' ? element.style.display = 'block' : element.style.display = 'none';
+}
+
 
 
 // On button click, prepare and display infographic
+
+document.getElementById("btn").addEventListener('click', function() {
+    // TODO: add form validation
+    // TODO: add removeForm Function
+    // TODO: add toggleButton Fuction - use for compare/reset buttons
+
+    humanData = getHumanData();
+    // Dinosaurs[3].setComparisonToHuman("Goodness")
+    generateTileGrid(Dinosaurs, humanData)
+    toggleElement(document.getElementById("dino-compare"));
+});
