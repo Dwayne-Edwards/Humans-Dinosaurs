@@ -4,7 +4,6 @@ import dinos from './dino.js';
 function Dinosaur (dino){
     let comparison = null;
     this.species = dino.species || null;
-    this.name = dino.species || null;
     this.weight = dino.weight || null;
     this.height = dino.height || null;
     this.diet = dino.diet || null;
@@ -29,7 +28,58 @@ const Dinosaurs = (function(){
     return dinosaurs;
 })();
     
-// Create store all DOM elements in a object to simplify interactions 
+// Create store DOM elements in a object to simplify interactions
+function DomCache () {
+    let elements = {};
+    this.add = function(key, element){
+        elements[key] = element;
+    };
+    this.get = function(key){
+        return elements[key];
+    };
+
+    this.toggle = function (el){
+        el.style.display === 'none' ? el.style.display = 'block' : el.style.display = 'none';
+    }
+
+    this.create = function(el, id, className){
+        
+    }
+    this.appendChild = function(parent, child){
+
+    }
+ 
+    this.print = function(){
+        console.log(elements);
+    }
+
+};
+
+const dom$ = new DomCache();
+
+const formElements = {
+    unit: document.getElementById("unit"),
+    name: document.getElementById("name"),
+    weight: document.getElementById("weight"),
+    // height: [document.getElementById("feet"), document.getElementById("inches")],
+    heightFT: document.getElementById("feet"),
+    heightIN: document.getElementById("inches"),
+    diet: document.getElementById("diet"),
+    where: document.getElementById("where"),
+
+    // Form Labels
+    unitLabel: document.getElementById("unitLabel"),
+    heightLabelFT: document.getElementById("heightLabel"),
+    heightLabelIN: document.getElementById("heightLabelIN"),
+    weightLabel: document.getElementById("weightLabel")
+
+}
+
+for (const element in formElements){
+    dom$.add(element , formElements[element]);
+}
+
+
 // Create Human Object and populate properties when [compare button] is clicked 
 let humanData = {};
 // Use IIFE to get human data from form
@@ -37,13 +87,14 @@ const getHumanData = (function() {
     let data = {};
     return function() {
         data = {
-            species: "Human",
-            name: document.getElementById("name").value,
-            weight: document.getElementById("weight").value,
-            height: [parseInt(document.getElementById("feet").value), parseInt(document.getElementById("inches").value)],
-            diet: document.getElementById("diet").value,
-            where: document.getElementById("where").value
+            species: 'Human',
+            name: dom$.get('name').value,
+            weight: dom$.get('weight').value,
+            height: [parseInt(dom$.get('heightFT').value), parseInt(dom$.get('heightIN').value)],
+            diet: dom$.get('diet').value,
+            where: dom$.get("where").value
         }
+        
     return data;
     };
 })();
@@ -53,7 +104,7 @@ const getHumanData = (function() {
 
 
 document.getElementById("unit").onclick = () => {
-    toggleUnitsAndValues()
+    toggleUnitsAndValues();
 };
 
 // Returns the current state of the form units in use
@@ -62,11 +113,11 @@ function getUnit(){
 }
 
 
-function updateFormMeasurements(height, weight, unit = getUnit()) { 
+function updateFormMeasurements(height, weight, unit = dom$.get('unit')) { 
     let isImperial = unit === 'imperial';
-    document.getElementById("feet").value = isImperial ? Math.floor(height / 100) : Math.floor(height / 12);
-    document.getElementById("inches").value = isImperial ?  Math.floor(height % 100) : Math.floor(height % 12);
-    document.getElementById("weight").value = isImperial ?  Math.round(weight / 2.203) : Math.round(weight * 2.203);
+    dom$.get('heightFT').value = isImperial ? Math.floor(height / 100) : Math.floor(height / 12);
+    dom$.get("heightIN").value = isImperial ?  Math.floor(height % 100) : Math.floor(height % 12);
+    dom$.get("weight").value = isImperial ?  Math.round(weight / 2.203) : Math.round(weight * 2.203);
 };
 
 
@@ -259,7 +310,7 @@ function generateTileGrid(dino, human){
             gridItem.className = "grid-item";
             // and give it some content
 
-            const gridItemTitle = document.createTextNode(`Species: ${item.name|| item.species }`);
+            const gridItemTitle = document.createTextNode(`Species: ${item.name || item.species }`);
             const gridItemImage = document.createElement("img");
             gridItemImage.src = `/images/${item.species.toLowerCase()}.png`;
           
