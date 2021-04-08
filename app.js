@@ -4,6 +4,7 @@ import dinos from './dino.js';
 function Dinosaur (dino){
     let comparison = null;
     this.species = dino.species || null;
+    this.name = dino.species || null;
     this.weight = dino.weight || null;
     this.height = dino.height || null;
     this.diet = dino.diet || null;
@@ -69,14 +70,14 @@ const formElements = {
 
     // Form Labels
     unitLabel: document.getElementById("unitLabel"),
-    heightLabelFT: document.getElementById("heightLabel"),
+    heightLabelFT: document.getElementById("heightLabelFT"),
     heightLabelIN: document.getElementById("heightLabelIN"),
     weightLabel: document.getElementById("weightLabel")
 
 }
 
 for (const element in formElements){
-    dom$.add(element , formElements[element]);
+    dom$.add(element, formElements[element]);
 }
 
 
@@ -101,19 +102,13 @@ const getHumanData = (function() {
 
 
 
-
-
-document.getElementById("unit").onclick = () => {
-    toggleUnitsAndValues();
-};
-
 // Returns the current state of the form units in use
 function getUnit(){
     return document.getElementById("unit").value;
 }
 
 
-function updateFormMeasurements(height, weight, unit = dom$.get('unit')) { 
+function toggleMeasurements(height, weight, unit) { 
     let isImperial = unit === 'imperial';
     dom$.get('heightFT').value = isImperial ? Math.floor(height / 100) : Math.floor(height / 12);
     dom$.get("heightIN").value = isImperial ?  Math.floor(height % 100) : Math.floor(height % 12);
@@ -122,19 +117,25 @@ function updateFormMeasurements(height, weight, unit = dom$.get('unit')) {
 
 
 //   Toggle the form's displayed units and update the [unit] checkbox value   
-function updateFormDisplayUnits(unit = getUnit()) { 
+function toggleUnits(unit) { 
     let isNotImperial = unit !== 'imperial';
-    document.getElementById("unit").value = isNotImperial ? 'imperial' : 'metric';
-    document.getElementById("label_units").innerText = isNotImperial ? 'Switch to metric': 'Uncheck for imperial';
-    document.getElementById("heightA").innerText = isNotImperial ? 'Feet: ': 'Meters: ';
-    document.getElementById("heightB").innerText = isNotImperial ? 'inches: ' : 'Cm: ';
-    document.getElementById("label_weight").innerText = isNotImperial ? 'lbs' : 'Kgs';
-
+    dom$.get('unit').value = isNotImperial ? 'imperial' : 'metric';
+    dom$.get('unitLabel').innerText = isNotImperial ? 'Switch to metric': 'Uncheck for imperial';
+    dom$.get('heightLabelFT').innerText = isNotImperial ? 'Feet: ': 'Meters: ';
+    dom$.get('heightLabelIN').innerText = isNotImperial ? 'inches: ' : 'Cm: ';
+    dom$.get('weightLabel').innerText = isNotImperial ? 'lbs' : 'Kgs';
 };
 
-function toggleUnitsAndValues(unit = getUnit()){
-    let h1 = document.getElementById("feet").value || 0;
-    let h2 = document.getElementById("inches").value || 0;
+function convertHeight(height, unit){
+    if(unit === 'imperial'){
+        return Math.round(height * 2.54)
+    } 
+    return Math.round(height / 2.54);
+}
+
+function toggleUnitsAndValues(unit = dom$.get('unit').value){
+    let h1 = dom$.get('heightFT').value || 0;
+    let h2 = dom$.get('heightIN').value || 0;
     let height = 0;
 
     if(unit === 'imperial'){
@@ -144,21 +145,18 @@ function toggleUnitsAndValues(unit = getUnit()){
     }
     
     let convertedHeight = convertHeight(height, unit)
-    let weight = document.getElementById("weight").value;
+    let weight = dom$.get('weight').value;
     
-    updateFormMeasurements(convertedHeight, weight);
-    updateFormDisplayUnits(getUnit());
+    toggleMeasurements(convertedHeight, weight, unit);
+    toggleUnits(unit);
     
 }
 
+document.getElementById("unit").onclick = () => {
+    toggleUnitsAndValues();
+};
 
 
-function convertHeight(height, unit = getUnit()){
-    if(unit === 'imperial'){
-        return Math.round(height * 2.54)
-    } 
-    return Math.round(height / 2.54);
-}
 
 // Helper functions
 function isValidKey(key, validKeys = Object.keys(getHumanData())){
@@ -219,7 +217,7 @@ const makeComparison = function (obj1, obj2, objectKey, comparisonUnit = getUnit
                     break;
                 }
                 comparison = objectKey === 'diet' ? `${obj1.name} is a ${obj1.diet} unlike ${obj2.name} the ${obj2.diet}`
-                : `${obj1.name} are found in ${obj1.where} and ${obj2.name} location is ${obj2.where}`
+                : `${obj1.name} location: ${obj1.where} and ${obj2.name} is located: ${obj2.where}`
                 
                 previouslyUsedKeys.push(objectKey);  
                 break;
