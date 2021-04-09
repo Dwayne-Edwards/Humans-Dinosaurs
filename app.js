@@ -44,7 +44,15 @@ function DomCache () {
     }
 
     this.create = function(el, id, className){
-        
+        let element = document.createElement(el);
+        element.id = id;
+        element.className = className;
+        return element;    
+    }
+    this.textNode = function(content){
+        let element = document.createTextNode(content);
+        element.createTextNode = content || '';
+        return element;    
     }
     this.appendChild = function(parent, child){
 
@@ -178,6 +186,7 @@ const makeComparison = function (obj1, obj2, objectKey, comparisonUnit = getUnit
     let comparison = '';
     let obj1Value = obj1[objectKey];
     let obj2Value = obj2[objectKey];
+    let obj2Name = obj2.name.split(' ')[0]
     let unit;
     if(objectKey === 'height'){
         unit = comparisonUnit === 'imperial' ? 'inches' : 'centimeters';
@@ -185,20 +194,23 @@ const makeComparison = function (obj1, obj2, objectKey, comparisonUnit = getUnit
         unit = comparisonUnit === 'imperial' ? 'lbs' : 'kgs';
     }
     if(isValidKey(objectKey) && !previouslyUsedKeys.includes(objectKey)){
+        
         switch(objectKey){
+            case 'species':
+                objectKey = !previouslyUsedKeys.includes('height') ? 'height' : 'diet';
             case 'height':
             case 'weight':
                 if(typeof obj1Value === "string"){obj1Value = convertToInteger(obj1Value);}
                 if(typeof obj2Value === "string"){obj2Value = convertToInteger(obj2Value);} 
                 if(obj1Value > obj2Value){
-                    comparison = `The ${objectKey} of ${obj1.name} is about 
-                    ${obj1.height - obj2.height} ${unit} more than ${obj2.name}`
+                    comparison = `${obj1.name} ${objectKey} is about 
+                    ${obj1.height - obj2.height} ${unit} more than ${obj2Name}`
                     
                     previouslyUsedKeys.push(objectKey);
                     break;
                 }
-                comparison = `The ${objectKey} of ${obj1.name} is about 
-                ${obj2.height - obj1.height} ${unit} less than ${obj2.name}`
+                comparison = `${obj1.name} ${objectKey} is about 
+                ${obj2.height - obj1.height} ${unit} less than ${obj2Name}`
                 
                 previouslyUsedKeys.push(objectKey);
                 break;
@@ -210,14 +222,14 @@ const makeComparison = function (obj1, obj2, objectKey, comparisonUnit = getUnit
                 
                 if(obj1Value.toLowerCase() === obj2Value.toLowerCase() 
                 || obj1Value.toLowerCase().includes(obj2Value.toLowerCase())){
-                    comparison = objectKey === 'diet' ? `${obj1.name} and ${obj2.name} are both ${obj2.diet}` 
-                    : `${obj1.name} and ${obj2.name} have ${obj1.where} in common`
+                    comparison = objectKey === 'diet' ? `${obj1.name} and ${obj2Name} are both ${obj2.diet}` 
+                    : `${obj1.name} and ${obj2Name} have ${obj1.where} in common`
                     
                     previouslyUsedKeys.push(objectKey);
                     break;
                 }
-                comparison = objectKey === 'diet' ? `${obj1.name} is a ${obj1.diet} unlike ${obj2.name} the ${obj2.diet}`
-                : `${obj1.name} location: ${obj1.where} and ${obj2.name} is located: ${obj2.where}`
+                comparison = objectKey === 'diet' ? `${obj1.name} is a ${obj1.diet} unlike ${obj2Name} the ${obj2.diet}`
+                : `${obj1.name} location: ${obj1.where} and ${obj2Name} is: ${obj2.where}`
                 
                 previouslyUsedKeys.push(objectKey);  
                 break;
@@ -226,18 +238,18 @@ const makeComparison = function (obj1, obj2, objectKey, comparisonUnit = getUnit
                 if(typeof obj1Value === "number"){obj1Value = convertToString(obj1Value);}
                 if(typeof obj2Value === "number"){obj2Value = convertToString(obj2Value);}
                 if(obj1Value .toLowerCase() < obj2Value.toLowerCase()){
-                    comparison = `${obj1.name} name would come before ${obj2.name} in a list`;
+                    comparison = `Alphabetically ${obj1.name} comes before ${obj2Name}`;
                     
                     previouslyUsedKeys.push(objectKey); 
                     break;
                 } else if(obj1Value .toLowerCase() > obj2Value .toLowerCase()){
-                    comparison = `${obj2.name} name would come before ${obj1.name} in a list`; 
+                    comparison = `Alphabetically ${obj2Name} comes before ${obj1.name}`; 
 
                     previouslyUsedKeys.push(objectKey); 
                     break;
                 } else {
-                    comparison = (obj1.name).length > (obj2.name).length ? `${obj1.name} name is longer than ${obj2.name}`
-                    : `${obj1.name} name is not longer than ${obj2.name}`;
+                    comparison = (obj1.name).length > (obj2.name).length ? `${obj1.name} name is longer than ${obj2Name}`
+                    : `${obj1.name} name is not longer than ${obj2Name}`;
                     
                     previouslyUsedKeys.push(objectKey);
                     break;
@@ -249,7 +261,7 @@ const makeComparison = function (obj1, obj2, objectKey, comparisonUnit = getUnit
     } else {
         let fact = Math.floor(Math.random() * 5)
         let when = Math.floor(Math.random() * 5)
-        comparison = fact > when ? `${obj1.species} fact:  ${obj1.fact}` : `${obj1.species} lived during the ${obj1.when} period`;
+        comparison = fact > when ? `Fact:  ${obj1.fact}` : `${obj1.species} lived during the ${obj1.when} period`;
                 
         previouslyUsedKeys.push(objectKey);
     }
@@ -289,32 +301,58 @@ function shuffleArray(array) {
 
     // Generate Tiles for each Dino in Array
 function generateTileGrid(dino, human){
-    let keys = shuffleArray(Object.keys(dino[0]));
+    let keys = shuffleArray(Object.keys(human));
+    console.log('KEYs' + keys)
     let items = arrayMiddleInsert(shuffleArray(dino), human);
     items.forEach(item => {
         if(item instanceof Dinosaur){
             // TODO: Check for pigeon object
-            let key = keys.pop();
-            item.setComparisonToHuman(makeComparison(item, human, keys.pop()));
-            console.log(item.getComparison());
+            let key = shuffleArray(Object.keys(human))[0];
+            console.log('KEY' + key)
+            item.setComparisonToHuman(makeComparison(item, human, key));
         }
         
         
 
-            // create a new div element
-            const gridItem = document.createElement("div");
-            
-            gridItem.id = "grid-item"
-            gridItem.className = "grid-item";
-            // and give it some content
-
-            const gridItemTitle = document.createTextNode(`Species: ${item.name || item.species }`);
-            const gridItemImage = document.createElement("img");
-            gridItemImage.src = `/images/${item.species.toLowerCase()}.png`;
-          
-            // add the text node to the newly created div
+            // create new Grid Item elements
+            const gridItem = dom$.create('div', "grid-item", "grid-item");
+        
+            // and create title
+            const gridItemTitle = dom$.create('h3');
+            const titleText = dom$.textNode(item.name || item.species );
+            gridItemTitle.appendChild(titleText);
             gridItem.appendChild(gridItemTitle);
+
+            // Create comparision to User
+            const gridItemComparison = dom$.create('div', `grid-${item.species}-comparison`, 'grid-comparison');
+            const comparisonText = item.species.toLowerCase() !== 'human' ? dom$.textNode(item.getComparison()) : dom$.textNode('');
+            gridItemComparison.appendChild(comparisonText);
+            gridItem.appendChild(gridItemComparison);
+            
+            // Create and add image
+            const gridItemImage = dom$.create('img', 'species-diet', 'full-info');
+            gridItemImage.src = `/images/${item.species.toLowerCase()}.png`;
             gridItem.appendChild(gridItemImage);
+
+            // create grid infobox
+            const gridItemInfoBox = dom$.create('div', `${(item.species).toLowerCase()}-info`, 'grid-item-info')
+            
+            let gridItemContent = {
+                // create and add Height + Weight Info
+                heightWeight : `Height: ${item.height}  |  weight: ${item.weight} pounds`,
+                dietLocation : `Diet: ${item.diet}  |  Location: ${item.where}`,
+                timeSpan : `Time Period: ${item.when}`,
+                speciesFact : item.fact,
+            };
+
+            for(const content in gridItemContent){
+                let element = dom$.create('p');
+                let text = dom$.textNode(gridItemContent[content]);
+                element.appendChild(text);
+                gridItemInfoBox.appendChild(element);
+            }
+            
+            gridItem.appendChild(gridItemInfoBox);
           
             // add the newly created element and its content into the DOM
             document.getElementById('grid').appendChild(gridItem);
