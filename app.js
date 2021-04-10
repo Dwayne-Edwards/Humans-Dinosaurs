@@ -39,7 +39,8 @@ function DomCache() {
         return elements[key];
     };
 
-    this.toggle = function (el){
+    this.toggle = function (id){
+        let el = document.getElementById(id)
         el.style.display === 'none' ? el.style.display = 'block' : el.style.display = 'none';
     }
 
@@ -81,45 +82,15 @@ for (const element in domElements){
 }
 
 
-// Create Human Object and populate properties when [compare button] is clicked 
-let humanData = {};
-// Use IIFE to get human data from form
+// Create userObj Object and populate properties when [compare button] is clicked 
+// Use IIFE to get userObj data from form
 const userData = (function() {
     let data = {};
-    // function() {
-    //     data = {
-    //         species: 'Human',
-    //         name: dom$.get('name').value,
-    //         weight: dom$.get('weight').value,
-    //         height: [parseInt(dom$.get('heightFT').value), parseInt(dom$.get('heightIN').value)],
-    //         diet: dom$.get('diet').value,
-    //         where: dom$.get("where").value
-    //     }
-        
-    // // return data;
-    // };
-        
-    function getUserFirstName(){
-        let name = getUserName();
-        return firstName = name.split(' ')[0];
-    };
-
-    function setProperty(key, value){
+    function set(key, value){
         data[key] = value;
     };
-    function getProperty(key){
-        return data[key];
-    };
-
-    return {
-        set: setProperty,
-        species: 'Human',
-        name: getProperty,
-        weight: getProperty,
-        height: getProperty,
-        diet: getProperty,
-        where: getProperty
-    };
+    data['set'] = set;
+    return data;
 })();
 
 
@@ -130,7 +101,7 @@ function getUnit(){
 }
 
 
-function toggleMeasurements(height, weight, unit) { 
+function toggleUnitValues(height, weight, unit) { 
     let isImperial = unit === 'imperial';
     dom$.get('heightFT').value = isImperial ? Math.floor(height / 100) : Math.floor(height / 12);
     dom$.get("heightIN").value = isImperial ?  Math.floor(height % 100) : Math.floor(height % 12);
@@ -169,14 +140,12 @@ function toggleUnitsAndValues(unit = dom$.get('unit').value){
     let convertedHeight = convertHeight(height, unit)
     let weight = dom$.get('weight').value;
     
-    toggleMeasurements(convertedHeight, weight, unit);
+    toggleUnitValues(convertedHeight, weight, unit);
     toggleUnits(unit);
     
 }
 
-document.getElementById("unit").onclick = () => {
-    toggleUnitsAndValues();
-};
+
 
 
 
@@ -195,13 +164,13 @@ function convertToString(str){
 }
     
     
-const makeComparison = function (obj1, obj2, objectKey, comparisonUnit = getUnit()){
+const makeComparison = function (compareObj, userObj, objectKey, comparisonUnit = getUnit()){
+    
     let previouslyUsedKeys = [];
     let comparison = '';
-    let obj1Value = obj1[objectKey];
-    let obj2Value = obj2[objectKey];
-    // let obj2Name = obj2.name;
-    
+    let compareObjValue = compareObj[objectKey];
+    let userObjValue = userObj[objectKey];
+    let userFirstName = userObj['name'].split(' ')[0];
     let unit;
     if(objectKey === 'height'){
         unit = comparisonUnit === 'imperial' ? 'inches' : 'centimeters';
@@ -215,56 +184,56 @@ const makeComparison = function (obj1, obj2, objectKey, comparisonUnit = getUnit
                 objectKey = !previouslyUsedKeys.includes('height') ? 'height' : 'diet';
             case 'height':
             case 'weight':
-                if(typeof obj1Value === "string"){obj1Value = convertToInteger(obj1Value);}
-                if(typeof obj2Value === "string"){obj2Value = convertToInteger(obj2Value);} 
-                if(obj1Value > obj2Value){
-                    comparison = `${obj1.name} ${objectKey} is about 
-                    ${obj1.height - obj2.height} ${unit} more than ${obj2Name}`
+                if(typeof compareObjValue === "string"){compareObjValue = convertToInteger(compareObjValue);}
+                if(typeof userObjValue === "string"){userObjValue = convertToInteger(userObjValue);} 
+                if(compareObjValue > userObjValue){
+                    comparison = `${compareObj.name} ${objectKey} is about 
+                    ${compareObj.height - userObj.height} ${unit} more than ${userFirstName}`
                     
                     previouslyUsedKeys.push(objectKey);
                     break;
                 }
-                comparison = `${obj1.name} ${objectKey} is about 
-                ${obj2.height - obj1.height} ${unit} less than ${obj2Name}`
+                comparison = `${compareObj.name} ${objectKey} is about 
+                ${userObj.height - compareObj.height} ${unit} less than ${userFirstName}`
                 
                 previouslyUsedKeys.push(objectKey);
                 break;
             
             case 'diet':
             case 'where':
-                if(typeof obj1Value === "number"){obj1Value = convertToString(obj1Value);}
-                if(typeof obj2Value === "number"){obj2Value = convertToString(obj2Value);}
+                if(typeof compareObjValue === "number"){compareObjValue = convertToString(compareObjValue);}
+                if(typeof userObjValue === "number"){userObjValue = convertToString(userObjValue);}
                 
-                if(obj1Value.toLowerCase() === obj2Value.toLowerCase() 
-                || obj1Value.toLowerCase().includes(obj2Value.toLowerCase())){
-                    comparison = objectKey === 'diet' ? `${obj1.name} and ${obj2Name} are both ${obj2.diet}` 
-                    : `${obj1.name} and ${obj2Name} have ${obj1.where} in common`
+                if(compareObjValue.toLowerCase() === userObjValue.toLowerCase() 
+                || compareObjValue.toLowerCase().includes(userObjValue.toLowerCase())){
+                    comparison = objectKey === 'diet' ? `${compareObj.name} and ${userFirstName} are both ${userObj.diet}` 
+                    : `${compareObj.name} and ${userFirstName} have ${compareObj.where} in common`
                     
                     previouslyUsedKeys.push(objectKey);
                     break;
                 }
-                comparison = objectKey === 'diet' ? `${obj1.name} is a ${obj1.diet} unlike ${obj2Name} the ${obj2.diet}`
-                : `${obj1.name} location: ${obj1.where} and ${obj2Name} is: ${obj2.where}`
+                comparison = objectKey === 'diet' ? `${compareObj.name} is a ${compareObj.diet} unlike ${userFirstName} the ${userObj.diet}`
+                : `${compareObj.name} location: ${compareObj.where} and ${userFirstName} is: ${userObj.where}`
                 
                 previouslyUsedKeys.push(objectKey);  
                 break;
             
             case 'name':
-                if(typeof obj1Value === "number"){obj1Value = convertToString(obj1Value);}
-                if(typeof obj2Value === "number"){obj2Value = convertToString(obj2Value);}
-                if(obj1Value .toLowerCase() < obj2Value.toLowerCase()){
-                    comparison = `Alphabetically ${obj1.name} comes before ${obj2Name}`;
+                if(typeof compareObjValue === "number"){compareObjValue = convertToString(compareObjValue);}
+                if(typeof userObjValue === "number"){userObjValue = convertToString(userObjValue);}
+                if(compareObjValue.toLowerCase() < userObjValue.toLowerCase()){
+                    comparison = `Alphabetically ${compareObj.name} comes before ${userFirstName}`;
                     
                     previouslyUsedKeys.push(objectKey); 
                     break;
-                } else if(obj1Value .toLowerCase() > obj2Value .toLowerCase()){
-                    comparison = `Alphabetically ${obj2Name} comes before ${obj1.name}`; 
+                } else if(compareObjValue.toLowerCase() > userObjValue.toLowerCase()){
+                    comparison = `Alphabetically ${userFirstName} comes before ${compareObj.name}`; 
 
                     previouslyUsedKeys.push(objectKey); 
                     break;
                 } else {
-                    comparison = (obj1.name).length > (obj2.name).length ? `${obj1.name} name is longer than ${obj2Name}`
-                    : `${obj1.name} name is not longer than ${obj2Name}`;
+                    comparison = (compareObj.name).length > (userObj.name).length ? `${compareObj.name} name is longer than ${userFirstName}`
+                    : `${compareObj.name} name is not longer than ${userFirstName}`;
                     
                     previouslyUsedKeys.push(objectKey);
                     break;
@@ -276,7 +245,7 @@ const makeComparison = function (obj1, obj2, objectKey, comparisonUnit = getUnit
     } else {
         let fact = Math.floor(Math.random() * 5)
         let when = Math.floor(Math.random() * 5)
-        comparison = fact > when ? `Fact:  ${obj1.fact}` : `${obj1.species} lived during the ${obj1.when} period`;
+        comparison = fact > when ? `Fact:  ${compareObj.fact}` : `${compareObj.species} lived during the ${compareObj.when} period`;
                 
         previouslyUsedKeys.push(objectKey);
     }
@@ -315,18 +284,15 @@ function shuffleArray(array) {
 
 
     // Generate Tiles for each Dino in Array
-function generateTileGrid(dino, human){
-    let keys = shuffleArray(Object.keys(human));
-    let items = arrayMiddleInsert(shuffleArray(dino), human);
+function generateTileGrid(dino, userObj){
+    let keys = ['species', 'name', 'height', 'weight', 'where'];
+    let items = arrayMiddleInsert(shuffleArray(dino), userObj);
     items.forEach(item => {
         if(item instanceof Dinosaur){
             // TODO: Check for pigeon object
-            let key = shuffleArray(Object.keys(human))[0];
-            item.setComparisonToHuman(makeComparison(item, human, key));
+            let randomKey = shuffleArray(keys)[0];
+            item.setComparisonToHuman(makeComparison(item, userObj, randomKey));
         }
-        
-        
-
             // create new Grid Item elements
             const gridItem = dom$.create('div', "grid-item", "grid-item");
         
@@ -335,8 +301,8 @@ function generateTileGrid(dino, human){
             const titleText = dom$.textNode(item.name || item.species );
             gridItemTitle.appendChild(titleText);
             gridItem.appendChild(gridItemTitle);
-
-            // Create comparision to User
+        console.log(item);
+            // Create comparison to User
             const gridItemComparison = dom$.create('div', `grid-${item.species}-comparison`, 'grid-comparison');
             const comparisonText = item.species.toLowerCase() !== 'human' ? dom$.textNode(item.getComparison()) : dom$.textNode('');
             gridItemComparison.appendChild(comparisonText);
@@ -374,7 +340,9 @@ function generateTileGrid(dino, human){
 } 
 
  
-
+document.getElementById("unit").onclick = () => {
+    toggleUnitsAndValues();
+};
 
     // Add tiles to DOM
 
@@ -389,23 +357,22 @@ function toggleElement(element){
 
 document.getElementById("btn").addEventListener('click', function() {
     // TODO: add form validation
-    // TODO: add removeForm Function
     // TODO: add toggleButton Fuction - use for compare/reset buttons
-    let data = {
+    let formData = {
         species: 'Human',
         name: dom$.get('name').value,
         weight: dom$.get('weight').value,
         height: [parseInt(dom$.get('heightFT').value), parseInt(dom$.get('heightIN').value)],
         diet: dom$.get('diet').value,
-        where: dom$.get("where").value
+        where: dom$.get("where").value,
+        fact: "Humans are the most stupid living things"
     }
 
-    for (const [key, value] of Object.entries(data)) {
-        console.log(`${key}: ${value}`);
+    for (const [key, value] of Object.entries(formData)) {
         userData.set(key, value);
-      }
-    humanData = userData;
+    }
     // Dinosaurs[3].setComparisonToHuman("Goodness")
-    generateTileGrid(Dinosaurs, humanData)
-    toggleElement(document.getElementById("dino-compare"));
+    generateTileGrid(Dinosaurs, userData)
+    // toggleElement(document.getElementById("dino-compare"));
+    dom$.toggle("dino-compare");
 });
