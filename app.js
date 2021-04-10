@@ -30,7 +30,7 @@ const Dinosaurs = (function(){
 })();
     
 // Create store DOM elements in a object to simplify interactions
-function DomCache () {
+function DomCache() {
     let elements = {};
     this.add = function(key, element){
         elements[key] = element;
@@ -54,19 +54,11 @@ function DomCache () {
         element.createTextNode = content || '';
         return element;    
     }
-    this.appendChild = function(parent, child){
-
-    }
- 
-    this.print = function(){
-        console.log(elements);
-    }
-
 };
 
 const dom$ = new DomCache();
 
-const formElements = {
+const domElements = {
     unit: document.getElementById("unit"),
     name: document.getElementById("name"),
     weight: document.getElementById("weight"),
@@ -84,27 +76,49 @@ const formElements = {
 
 }
 
-for (const element in formElements){
-    dom$.add(element, formElements[element]);
+for (const element in domElements){
+    dom$.add(element, domElements[element]);
 }
 
 
 // Create Human Object and populate properties when [compare button] is clicked 
 let humanData = {};
 // Use IIFE to get human data from form
-const getHumanData = (function() {
+const userData = (function() {
     let data = {};
-    return function() {
-        data = {
-            species: 'Human',
-            name: dom$.get('name').value,
-            weight: dom$.get('weight').value,
-            height: [parseInt(dom$.get('heightFT').value), parseInt(dom$.get('heightIN').value)],
-            diet: dom$.get('diet').value,
-            where: dom$.get("where").value
-        }
+    // function() {
+    //     data = {
+    //         species: 'Human',
+    //         name: dom$.get('name').value,
+    //         weight: dom$.get('weight').value,
+    //         height: [parseInt(dom$.get('heightFT').value), parseInt(dom$.get('heightIN').value)],
+    //         diet: dom$.get('diet').value,
+    //         where: dom$.get("where").value
+    //     }
         
-    return data;
+    // // return data;
+    // };
+        
+    function getUserFirstName(){
+        let name = getUserName();
+        return firstName = name.split(' ')[0];
+    };
+
+    function setProperty(key, value){
+        data[key] = value;
+    };
+    function getProperty(key){
+        return data[key];
+    };
+
+    return {
+        set: setProperty,
+        species: 'Human',
+        name: getProperty,
+        weight: getProperty,
+        height: getProperty,
+        diet: getProperty,
+        where: getProperty
     };
 })();
 
@@ -167,7 +181,7 @@ document.getElementById("unit").onclick = () => {
 
 
 // Helper functions
-function isValidKey(key, validKeys = Object.keys(getHumanData())){
+function isValidKey(key, validKeys = Object.keys(userData)){
     return validKeys.includes(key);
 }
 function convertToInteger(n){
@@ -186,7 +200,8 @@ const makeComparison = function (obj1, obj2, objectKey, comparisonUnit = getUnit
     let comparison = '';
     let obj1Value = obj1[objectKey];
     let obj2Value = obj2[objectKey];
-    let obj2Name = obj2.name.split(' ')[0]
+    // let obj2Name = obj2.name;
+    
     let unit;
     if(objectKey === 'height'){
         unit = comparisonUnit === 'imperial' ? 'inches' : 'centimeters';
@@ -302,13 +317,11 @@ function shuffleArray(array) {
     // Generate Tiles for each Dino in Array
 function generateTileGrid(dino, human){
     let keys = shuffleArray(Object.keys(human));
-    console.log('KEYs' + keys)
     let items = arrayMiddleInsert(shuffleArray(dino), human);
     items.forEach(item => {
         if(item instanceof Dinosaur){
             // TODO: Check for pigeon object
             let key = shuffleArray(Object.keys(human))[0];
-            console.log('KEY' + key)
             item.setComparisonToHuman(makeComparison(item, human, key));
         }
         
@@ -378,8 +391,20 @@ document.getElementById("btn").addEventListener('click', function() {
     // TODO: add form validation
     // TODO: add removeForm Function
     // TODO: add toggleButton Fuction - use for compare/reset buttons
+    let data = {
+        species: 'Human',
+        name: dom$.get('name').value,
+        weight: dom$.get('weight').value,
+        height: [parseInt(dom$.get('heightFT').value), parseInt(dom$.get('heightIN').value)],
+        diet: dom$.get('diet').value,
+        where: dom$.get("where").value
+    }
 
-    humanData = getHumanData();
+    for (const [key, value] of Object.entries(data)) {
+        console.log(`${key}: ${value}`);
+        userData.set(key, value);
+      }
+    humanData = userData;
     // Dinosaurs[3].setComparisonToHuman("Goodness")
     generateTileGrid(Dinosaurs, humanData)
     toggleElement(document.getElementById("dino-compare"));
