@@ -68,13 +68,15 @@ const domElements = {
     heightIN: document.getElementById("inches"),
     diet: document.getElementById("diet"),
     where: document.getElementById("where"),
+    
+    compare: document.getElementById("btn"),
+    grid: document.getElementById('grid'),
 
     // Form Labels
     unitLabel: document.getElementById("unitLabel"),
     heightLabelFT: document.getElementById("heightLabelFT"),
     heightLabelIN: document.getElementById("heightLabelIN"),
-    weightLabel: document.getElementById("weightLabel")
-
+    weightLabel: document.getElementById("weightLabel"),
 }
 
 for (const element in domElements){
@@ -95,14 +97,9 @@ const userData = (function() {
 
 
 
-// Returns the current state of the form units in use
-function getUnit(){
-    return document.getElementById("unit").value;
-}
-
-
 function toggleUnitValues(height, weight, unit) { 
     let isImperial = unit === 'imperial';
+    dom$.get('unit').value = isImperial ? 'metric' : 'imperial';
     dom$.get('heightFT').value = isImperial ? Math.floor(height / 100) : Math.floor(height / 12);
     dom$.get("heightIN").value = isImperial ?  Math.floor(height % 100) : Math.floor(height % 12);
     dom$.get("weight").value = isImperial ?  Math.round(weight / 2.203) : Math.round(weight * 2.203);
@@ -111,12 +108,11 @@ function toggleUnitValues(height, weight, unit) {
 
 //   Toggle the form's displayed units and update the [unit] checkbox value   
 function toggleUnits(unit) { 
-    let isNotImperial = unit !== 'imperial';
-    dom$.get('unit').value = isNotImperial ? 'imperial' : 'metric';
-    dom$.get('unitLabel').innerText = isNotImperial ? 'Switch to metric': 'Uncheck for imperial';
-    dom$.get('heightLabelFT').innerText = isNotImperial ? 'Feet: ': 'Meters: ';
-    dom$.get('heightLabelIN').innerText = isNotImperial ? 'inches: ' : 'Cm: ';
-    dom$.get('weightLabel').innerText = isNotImperial ? 'lbs' : 'Kgs';
+    let isImperial = unit !== 'imperial';
+    dom$.get('unitLabel').innerText = isImperial ? 'Uncheck for imperial': 'Switch to metric';
+    dom$.get('heightLabelFT').innerText = isImperial ? 'Meters: ': 'Feet: ';
+    dom$.get('heightLabelIN').innerText = isImperial ? 'Cm: ' : 'Inches: ';
+    dom$.get('weightLabel').innerText = isImperial ? 'kgs' : 'lbs';
 };
 
 function convertHeight(height, unit){
@@ -164,7 +160,7 @@ function convertToString(str){
 }
     
     
-const makeComparison = function (compareObj, userObj, objectKey, comparisonUnit = getUnit()){
+const makeComparison = function (compareObj, userObj, objectKey, comparisonUnit){
     
     let previouslyUsedKeys = [];
     let comparison = '';
@@ -284,14 +280,14 @@ function shuffleArray(array) {
 
 
     // Generate Tiles for each Dino in Array
-function generateTileGrid(dino, userObj){
+function generateTileGrid(dino, userObj, unit){
     let keys = ['species', 'name', 'height', 'weight', 'where'];
     let items = arrayMiddleInsert(shuffleArray(dino), userObj);
     items.forEach(item => {
         if(item instanceof Dinosaur){
             // TODO: Check for pigeon object
             let randomKey = shuffleArray(keys)[0];
-            item.setComparisonToHuman(makeComparison(item, userObj, randomKey));
+            item.setComparisonToHuman(makeComparison(item, userObj, randomKey, unit));
         }
             // create new Grid Item elements
             const gridItem = dom$.create('div', "grid-item", "grid-item");
@@ -301,7 +297,7 @@ function generateTileGrid(dino, userObj){
             const titleText = dom$.textNode(item.name || item.species );
             gridItemTitle.appendChild(titleText);
             gridItem.appendChild(gridItemTitle);
-        console.log(item);
+
             // Create comparison to User
             const gridItemComparison = dom$.create('div', `grid-${item.species}-comparison`, 'grid-comparison');
             const comparisonText = item.species.toLowerCase() !== 'human' ? dom$.textNode(item.getComparison()) : dom$.textNode('');
@@ -334,28 +330,19 @@ function generateTileGrid(dino, userObj){
             gridItem.appendChild(gridItemInfoBox);
           
             // add the newly created element and its content into the DOM
-            document.getElementById('grid').appendChild(gridItem);
+            dom$.get('grid').appendChild(gridItem);
          
     })
 } 
 
  
-document.getElementById("unit").onclick = () => {
-    toggleUnitsAndValues();
-};
+dom$.get('unit').onclick = () => toggleUnitsAndValues();
 
     // Add tiles to DOM
 
-    // Toggle HTML Element diplay property
-function toggleElement(element){
-    element.style.display === 'none' ? element.style.display = 'block' : element.style.display = 'none';
-}
-
-
 
 // On button click, prepare and display infographic
-
-document.getElementById("btn").addEventListener('click', function() {
+dom$.get('compare').addEventListener('click', function() {
     // TODO: add form validation
     // TODO: add toggleButton Fuction - use for compare/reset buttons
     let formData = {
@@ -365,14 +352,13 @@ document.getElementById("btn").addEventListener('click', function() {
         height: [parseInt(dom$.get('heightFT').value), parseInt(dom$.get('heightIN').value)],
         diet: dom$.get('diet').value,
         where: dom$.get("where").value,
-        fact: "Humans are the most stupid living things"
+        fact: "Dinosaurs believe Humans to be the most stupid things"
     }
 
     for (const [key, value] of Object.entries(formData)) {
         userData.set(key, value);
     }
-    // Dinosaurs[3].setComparisonToHuman("Goodness")
-    generateTileGrid(Dinosaurs, userData)
-    // toggleElement(document.getElementById("dino-compare"));
+    generateTileGrid(Dinosaurs, userData, dom$.get('unit').value)
+    // Toggle HTML Element diplay property
     dom$.toggle("dino-compare");
 });
