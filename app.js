@@ -352,7 +352,7 @@ const formValidation = (function () {
     // Reset the input to default
     function markInvalid(id){
         let element = dom$.get(id);
-        element.value = null;
+        element.value = id === 'name' ? "" : 0;
         element.className += " form-field_invalid";
         element.className = element.className.replace(/\bform-field_valid\b/g, "");
     }
