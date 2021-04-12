@@ -47,8 +47,8 @@ function DomCache() {
 
     this.create = function(el, id, className){
         let element = document.createElement(el);
-        element.id = id;
-        element.className = className;
+        element.id = id || "";
+        element.className = className || "";
         return element;    
     }
     this.textNode = function(content){
@@ -323,6 +323,9 @@ function generateTileGrid(dino, userObj, unit){
 
             for(const content in gridItemContent){
                 let element = dom$.create('p');
+                if(content !== 'speciesFact'){
+                    element.className += " extra-content"; 
+                }
                 let text = dom$.textNode(gridItemContent[content]);
                 element.appendChild(text);
                 gridItemInfoBox.appendChild(element);
@@ -335,9 +338,6 @@ function generateTileGrid(dino, userObj, unit){
          
     })
 } 
-
- 
-
 
 // Add form Validation
 const formValidation = (function () {

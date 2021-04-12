@@ -35,6 +35,7 @@ p {
     font-weight: 100;
 }
 
+
 /* Grid Styles */
 #grid {
     background: #fff url(images/tracks.png) no-repeat;
@@ -130,6 +131,13 @@ p {
     text-align: left;
     /* z-index: 100; */
 }
+.extra-content{
+    display: none;
+}
+.grid-item:hover .extra-content{
+    display: inline-block;
+}
+
 .grid-comparison {
     min-width: 70%;
     margin-left: auto;
