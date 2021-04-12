@@ -23,21 +23,23 @@
     <form id="dino-compare">
         <div class="form-container">
             <p>Name:</p>
-            <input id="name" class="form-field__full" type="name" name="name">
+            <input id="name" class="form-field__full" type="name" name="name" minlength="1">
             <input id="unit" class="form-field__units" type="checkbox" name="unit" value="imperial"><label id="unitLabel" class="label_units">Switch to metric</label>
-            <p>Height</p>
-            <label id="heightLabelFT">Feet: </label><input id="feet" class="form-field__short" type="number" name="feet">
-            <label id="heightLabelIN">inches: </label><input id="inches" class="form-field__short" type="number" name="inches">
+            <p>Height:</p>
+            <label id="heightLabelFT">Feet: </label><input id="feet" class="form-field__short" type="number" name="feet"min="0">
+            <label id="heightLabelIN">inches: </label><input id="inches" class="form-field__short" type="number" name="inches"min="0">
             <p>Weight:</p>
-            <input id="weight" class="form-field__short" type="number" name="weight"><label id="weightLabel">lbs</label>
+            <input id="weight" class="form-field__short" type="number" name="weight" min="1"><label id="weightLabel">lbs</label>
             <p>Region:</p>
             <select id="where" class="form-field__full" name="location">
+                <option>North America</option>
+                <option>South America</option>
+                <option>Europe</option>
                 <option>Africa</option>
                 <option>Asia</option>
                 <option>Australasia</option>
-                <option>Europe</option>
-                <option>North America</option>
-                <option>South America</option>
+                
+                
             </select>
             <p>Diet:</p>
             <select id="diet" class="form-field__full" name="diet">
@@ -45,7 +47,10 @@
                 <option>Omnivor</option>
                 <option>Carnivor</option>
             </select>
-            <div id="btn">Compare Me!</div>
+            
+            <div id="btn" class="form-field__full  btn">Compare Me</div>
+            <div id="error-message" class="error-message form-field__full">Invalid Entry! Please try again</div>
+            
         </div>
     </form>
     <!-- .grid to attach tiles to -->

@@ -35,8 +35,9 @@ function DomCache() {
     this.add = function(key, element){
         elements[key] = element;
     };
-    this.get = function(key){
-        return elements[key];
+    this.get = function(id){
+        // return elements[key];
+        return document.getElementById(id);
     };
 
     this.toggle = function (id){
@@ -64,8 +65,8 @@ const domElements = {
     name: document.getElementById("name"),
     weight: document.getElementById("weight"),
     // height: [document.getElementById("feet"), document.getElementById("inches")],
-    heightFT: document.getElementById("feet"),
-    heightIN: document.getElementById("inches"),
+    feet: document.getElementById("feet"),
+    inches: document.getElementById("inches"),
     diet: document.getElementById("diet"),
     where: document.getElementById("where"),
     
@@ -100,15 +101,15 @@ const userData = (function() {
 function toggleUnitValues(height, weight, unit) { 
     let isImperial = unit === 'imperial';
     dom$.get('unit').value = isImperial ? 'metric' : 'imperial';
-    dom$.get('heightFT').value = isImperial ? Math.floor(height / 100) : Math.floor(height / 12);
-    dom$.get("heightIN").value = isImperial ?  Math.floor(height % 100) : Math.floor(height % 12);
+    dom$.get('feet').value = isImperial ? Math.floor(height / 100) : Math.floor(height / 12);
+    dom$.get("inches").value = isImperial ?  Math.floor(height % 100) : Math.floor(height % 12);
     dom$.get("weight").value = isImperial ?  Math.round(weight / 2.203) : Math.round(weight * 2.203);
 };
 
 
 //   Toggle the form's displayed units and update the [unit] checkbox value   
 function toggleUnits(unit) { 
-    let isImperial = unit !== 'imperial';
+    let isImperial = unit === 'imperial';
     dom$.get('unitLabel').innerText = isImperial ? 'Uncheck for imperial': 'Switch to metric';
     dom$.get('heightLabelFT').innerText = isImperial ? 'Meters: ': 'Feet: ';
     dom$.get('heightLabelIN').innerText = isImperial ? 'Cm: ' : 'Inches: ';
@@ -123,8 +124,8 @@ function convertHeight(height, unit){
 }
 
 function toggleUnitsAndValues(unit = dom$.get('unit').value){
-    let h1 = dom$.get('heightFT').value || 0;
-    let h2 = dom$.get('heightIN').value || 0;
+    let h1 = dom$.get('feet').value || 0;
+    let h2 = dom$.get('inches').value || 0;
     let height = 0;
 
     if(unit === 'imperial'){
@@ -336,29 +337,99 @@ function generateTileGrid(dino, userObj, unit){
 } 
 
  
+
+
+// Add form Validation
+const formValidation = (function () {
+    let formFields = {
+        name: false,
+        feet: false,
+        inches: false,
+        weight: false
+    }
+
+    // change button to read with a message
+    // Hightlight the input field with a red border
+    // Reset the input to default
+    function markInvalid(id){
+        let element = dom$.get(id);
+        element.value = null;
+        element.className += " form-field_invalid";
+        element.className = element.className.replace(/\bform-field_valid\b/g, "");
+    }
+    function markValid(id){
+        let element = dom$.get(id);
+        element.className += " form-field_valid";
+        element.className = element.className.replace(/\bform-field_invalid\b/g, "");
+
+    }
+    function checkValidity(id, value){
+        switch(id){
+            case 'name':
+                if(value.length < 1 || value === ' '){
+                    markInvalid(id);
+                    return false;
+                }
+                markValid(id);
+                return true;
+            case 'feet':
+            case 'inches':
+            case 'weight':
+                if(isNaN(value) || value < 0){
+                    markInvalid(id);
+                    return false;
+                }
+                markValid(id);
+                return true;
+        }
+    }
+    function setState(id, value){
+        formFields[id] = checkValidity(id, value);
+    }
+    function validateFormState(){
+        let state = false;
+        for(const element in formFields){
+            state = formFields[element];
+        };
+        return state;
+    }
+    return {
+        get: validateFormState,
+        set: setState
+    }
+})();
+
+
+
 dom$.get('unit').onclick = () => toggleUnitsAndValues();
 
-    // Add tiles to DOM
-
-
+dom$.get('name').onchange = () => formValidation.set('name', dom$.get('name').value)
+dom$.get('weight').onchange = () => formValidation.set('weight', dom$.get('weight').value)
+dom$.get('feet').onchange = () => formValidation.set('feet', dom$.get('feet').value)
+dom$.get('inches').onchange = () => formValidation.set('inches', dom$.get('inches').value) 
+    
+    
 // On button click, prepare and display infographic
-dom$.get('compare').addEventListener('click', function() {
+dom$.get('btn').addEventListener('click', function() {
     // TODO: add form validation
     // TODO: add toggleButton Fuction - use for compare/reset buttons
-    let formData = {
-        species: 'Human',
-        name: dom$.get('name').value,
-        weight: dom$.get('weight').value,
-        height: [parseInt(dom$.get('heightFT').value), parseInt(dom$.get('heightIN').value)],
-        diet: dom$.get('diet').value,
-        where: dom$.get("where").value,
-        fact: "Dinosaurs believe Humans to be the most stupid things"
+    if(formValidation.get(dom$.get('btn'))){
+        let formData = {
+            species: 'Human',
+            name: dom$.get('name').value,
+            weight: dom$.get('weight').value,
+            height: [parseInt(dom$.get('feet').value), parseInt(dom$.get('inches').value)],
+            diet: dom$.get('diet').value,
+            where: dom$.get("where").value,
+            fact: "Dinosaurs believe Humans to be the most stupid things"
+        }
+        for (const [key, value] of Object.entries(formData)) {
+            userData.set(key, value);
+        }
+        generateTileGrid(Dinosaurs, userData, dom$.get('unit').value)
+        // Toggle HTML Element diplay property
+        dom$.toggle("dino-compare");
+    } else{
+        dom$.get('error-message').className += " form_invalid";
     }
-
-    for (const [key, value] of Object.entries(formData)) {
-        userData.set(key, value);
-    }
-    generateTileGrid(Dinosaurs, userData, dom$.get('unit').value)
-    // Toggle HTML Element diplay property
-    dom$.toggle("dino-compare");
 });
