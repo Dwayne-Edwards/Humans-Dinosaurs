@@ -352,7 +352,7 @@ const formValidation = (function () {
     // Reset the input to default
     function markInvalid(id){
         let element = dom$.get(id);
-        element.value = id === 'name' ? "" : 0;
+        // element.value = null;
         element.className += " form-field_invalid";
         element.className = element.className.replace(/\bform-field_valid\b/g, "");
     }
@@ -373,8 +373,23 @@ const formValidation = (function () {
                 return true;
             case 'feet':
             case 'inches':
+                if(isNaN(value) || value < 0 ){
+                    return false;
+                }
+                if(parseInt(dom$.get('feet').value, 10) + parseInt(dom$.get('inches').value, 10) > 0){
+                    formFields['feet'] = true;
+                    formFields['inches'] = true;
+                    markValid('feet');
+                    markValid('inches');
+                } else {
+                    formFields['feet'] = false;
+                    formFields['inches'] = false;
+                    markInvalid('feet');
+                    markInvalid('inches'); 
+                };
+                return true;
             case 'weight':
-                if(isNaN(value) || value < 0){
+                if(isNaN(value) || value < 1){
                     markInvalid(id);
                     return false;
                 }
@@ -386,8 +401,10 @@ const formValidation = (function () {
         formFields[id] = checkValidity(id, value);
     }
     function validateFormState(){
+       
         let state = true;
         for(const element in formFields){
+            // alert(state);
             if(formFields[element] === false){
                 state = false;
             }
