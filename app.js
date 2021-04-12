@@ -30,59 +30,41 @@ const Dinosaurs = (function(){
 })();
     
 // Create store DOM elements in a object to simplify interactions
-function DomCache() {
+const dom$ = (function() {
     let elements = {};
-    this.add = function(key, element){
+    function addElement(key, element){
         elements[key] = element;
     };
-    this.get = function(id){
-        // return elements[key];
+    function getElement(id){
         return document.getElementById(id);
     };
 
-    this.toggle = function (id){
+    function toggleElemet(id){
         let el = document.getElementById(id)
         el.style.display === 'none' ? el.style.display = 'block' : el.style.display = 'none';
     }
 
-    this.create = function(el, id, className){
+    function createElement(el, id, className){
         let element = document.createElement(el);
         element.id = id || "";
         element.className = className || "";
         return element;    
     }
-    this.textNode = function(content){
+    function createTextNode(content){
         let element = document.createTextNode(content);
         element.createTextNode = content || '';
         return element;    
     }
-};
 
-const dom$ = new DomCache();
+    return {
+        add: addElement,
+        get: getElement,
+        toggle: toggleElemet,
+        create: createElement,
+        textNode: createTextNode
 
-const domElements = {
-    unit: document.getElementById("unit"),
-    name: document.getElementById("name"),
-    weight: document.getElementById("weight"),
-    // height: [document.getElementById("feet"), document.getElementById("inches")],
-    feet: document.getElementById("feet"),
-    inches: document.getElementById("inches"),
-    diet: document.getElementById("diet"),
-    where: document.getElementById("where"),
-    
-    compare: document.getElementById("btn"),
-    grid: document.getElementById('grid'),
-
-    // Form Labels
-    unitLabel: document.getElementById("unitLabel"),
-    heightLabelFT: document.getElementById("heightLabelFT"),
-    heightLabelIN: document.getElementById("heightLabelIN"),
-    weightLabel: document.getElementById("weightLabel"),
-}
-
-for (const element in domElements){
-    dom$.add(element, domElements[element]);
-}
+    }
+})();
 
 
 // Create userObj Object and populate properties when [compare button] is clicked 
@@ -248,18 +230,6 @@ const makeComparison = function (compareObj, userObj, objectKey, comparisonUnit)
     return comparison;
 };
 
-
-    // Create Dino Compare Method 1
-    // NOTE: Weight in JSON file is in lbs, height in inches. 
-    
-    // Create Dino Compare Method 2
-    // NOTE: Weight in JSON file is in lbs, height in inches.
-
-    
-    // Create Dino Compare Method 3
-    // NOTE: Weight in JSON file is in lbs, height in inches.
-
-
     
     // Insert an item in the middle of an array of any length
 function arrayMiddleInsert(array, middleItem){
@@ -352,16 +322,16 @@ const formValidation = (function () {
     // Reset the input to default
     function markInvalid(id){
         let element = dom$.get(id);
-        // element.value = null;
         element.className += " form-field_invalid";
         element.className = element.className.replace(/\bform-field_valid\b/g, "");
     }
+
     function markValid(id){
         let element = dom$.get(id);
         element.className += " form-field_valid";
         element.className = element.className.replace(/\bform-field_invalid\b/g, "");
-
     }
+
     function checkValidity(id, value){
         switch(id){
             case 'name':
@@ -373,21 +343,21 @@ const formValidation = (function () {
                 return true;
             case 'feet':
             case 'inches':
-                if(isNaN(value) || value < 0 ){
-                    return false;
-                }
-                if(parseInt(dom$.get('feet').value, 10) + parseInt(dom$.get('inches').value, 10) > 0){
+                let height = parseInt(dom$.get('feet').value, 10) + parseInt(dom$.get('inches').value, 10)
+                if( height > 0){
                     formFields['feet'] = true;
                     formFields['inches'] = true;
                     markValid('feet');
                     markValid('inches');
+                    return true;
                 } else {
                     formFields['feet'] = false;
                     formFields['inches'] = false;
                     markInvalid('feet');
                     markInvalid('inches'); 
+                    return false;
                 };
-                return true;
+                
             case 'weight':
                 if(isNaN(value) || value < 1){
                     markInvalid(id);
@@ -397,20 +367,21 @@ const formValidation = (function () {
                 return true;
         }
     }
+
     function setState(id, value){
         formFields[id] = checkValidity(id, value);
     }
+
     function validateFormState(){
-       
         let state = true;
         for(const element in formFields){
-            // alert(state);
             if(formFields[element] === false){
                 state = false;
             }
         };
         return state;
     }
+
     return {
         get: validateFormState,
         set: setState
