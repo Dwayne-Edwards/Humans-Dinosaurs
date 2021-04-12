@@ -186,7 +186,6 @@ const makeComparison = function (compareObj, userObj, objectKey, comparisonUnit)
                 if(compareObjValue > userObjValue){
                     comparison = `${compareObj.name} ${objectKey} is about 
                     ${compareObj.height - userObj.height} ${unit} more than ${userFirstName}`
-                    
                     previouslyUsedKeys.push(objectKey);
                     break;
                 }
@@ -387,9 +386,11 @@ const formValidation = (function () {
         formFields[id] = checkValidity(id, value);
     }
     function validateFormState(){
-        let state = false;
+        let state = true;
         for(const element in formFields){
-            state = formFields[element];
+            if(formFields[element] === false){
+                state = false;
+            }
         };
         return state;
     }
