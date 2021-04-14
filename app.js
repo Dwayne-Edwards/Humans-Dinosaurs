@@ -79,13 +79,21 @@ const userData = (function() {
 })();
 
 
-
-function toggleUnitValues(height, weight, unit) { 
+function imperialMetricSwap(id, height, weight, unit){
     let isImperial = unit === 'imperial';
-    dom$.get('unit').value = isImperial ? 'metric' : 'imperial';
-    dom$.get('feet').value = isImperial ? Math.floor(height / 100) : Math.floor(height / 12);
-    dom$.get("inches").value = isImperial ?  Math.floor(height % 100) : Math.floor(height % 12);
-    dom$.get("weight").value = isImperial ?  Math.round(weight / 2.203) : Math.round(weight * 2.203);
+    if(id === 'unit'){ return isImperial ? 'metric' : 'imperial'};
+    if(id === 'feet'){ return isImperial ? Math.floor(height / 100) : Math.floor(height / 12)};
+    if(id === 'inches'){ return isImperial ?  Math.floor(height % 100) : Math.floor(height % 12)};
+    if(id === 'weight'){ return isImperial ?  Math.round(weight / 2.203) : Math.round(weight * 2.203)};
+    return;
+}
+
+
+function toggleValues(height, weight, unit, elementIds) { 
+    elementIds.forEach( id => {
+        dom$.get(id).value = imperialMetricSwap(id, height, weight, unit);
+    });
+
 };
 
 
@@ -98,147 +106,129 @@ function toggleUnits(unit) {
     dom$.get('weightLabel').innerText = isImperial ? 'kgs' : 'lbs';
 };
 
-function convertHeight(height, unit){
+
+function reduceToInches(ft, inches){
+    return parseInt(ft, 10) * 12 + parseInt(inches, 10);
+}
+
+function reduceToCentimeters(m, cm){
+    return parseInt(m, 10) * 100 + parseInt(cm, 10)
+}
+
+function toggleHeight(height, unit){
     if(unit === 'imperial'){
-        return Math.round(height * 2.54)
+        return Math.round(parseInt(height, 10) * 2.54)
     } 
-    return Math.round(height / 2.54);
+    return Math.round(parseInt(height, 10) / 2.54);
 }
 
-function toggleUnitsAndValues(unit = dom$.get('unit').value){
-    let h1 = dom$.get('feet').value || 0;
-    let h2 = dom$.get('inches').value || 0;
+function toggleUnitsAndValues(h1, h2, weight, unit, elementIds){
     let height = 0;
-
     if(unit === 'imperial'){
-        height = parseInt(h1, 10) * 12 + parseInt(h2, 10); 
+        height =  reduceToInches(h1, h2);
     } else {
-    height = parseInt(h1, 10) * 100 + parseInt(h2, 10);
+        height = reduceToCentimeters(h1, h2);
     }
-    
-    let convertedHeight = convertHeight(height, unit)
-    let weight = dom$.get('weight').value;
-    
-    toggleUnitValues(convertedHeight, weight, unit);
+    toggleValues(toggleHeight(height || 0, unit), weight, unit, elementIds);
     toggleUnits(unit);
+}
+
+// Normalize the comparing values
+// Imperial is reduced to inches
+// Metric is reduced to centimeters
+function normalizeHeight(num, unit){
+    let height;
+        // If user is using imperial units
+        if(unit === 'imperial' && Array.isArray(num)){
+            return height =  reduceToInches(num[0], num[1]);
+        }
+        // User is using  metric units
+        if(unit !== 'imperial' && Array.isArray(num)){
+            return height =  reduceToCentimeters(num[0], num[1]);
+        }
+
+        // If values are in imperial and the user is using metric
+        if(unit !== 'imperial'){
+           return height = toggleHeight(parseInt(num), 'imperial');
+        }
+      
+    // Otherwise return the the input value
+    return height = parseInt(num);
     
-}
+};
+
+function normalizeWeight(num, unit){
+    let weight;
+        // If user is using metric units
+        if(unit === 'metric'){
+            return weight =  parseFloat(num) / 2.203;
+        }
+    // Otherwise return the the input value
+    return weight = parseFloat(num);
+};
+  
+
+const compare = (function(){
+    function getComparisonPhrase (x, y, type, unit){
+        let username = y['name'].split(' ')[0];
+        x.diet = x.diet.toLowerCase();
+        y.diet = y.diet.toLowerCase();
+        x.where = x.where.toLowerCase();
+        y.where = y.where.toLowerCase();
+        let comparison = {   
+
+            // weight
+            weight: x.weight > y.weight ? `${x.name} weighs ${x.weight - y.weight } ${unit} more than ${username}` 
+                                        : `${username} weighs ${y.weight - x.weight } ${unit} more than ${x.name}`,
+            
+            // height
+            height: x.height > y.height ? `${x.name} is ${x.height - y.height} ${unit} taller than ${username}`
+                                        : `${username} is ${y.height - x.height} ${unit} taller than ${x.name}`,
+
+            // diet
+            diet: x.diet === y.diet ? `${x.name} and ${username} are both ${y.diet}`
+                                    : `${x.name} is ${x.diet} but ${username} is a  ${y.diet}`,
+
+            // location
+            where: x.where === y.where  ? `${x.name}  and ${username} are connected with ${y.where}`
+                                        : `${x.name} location: ${x.where} and ${username} location is ${y.where}`,
+
+            // name - alphabetically ranked a..z
+            name: x.name < username ? `Alphabetically ${x.name} comes before ${username}`
+                                    : `Alphabetically ${username} comes before ${x.name}`,
+
+            // provide a fact or time period as an alternative
+            fact: `${x.fact}`,
+            when: `${x.name} lived during the ${x.when} period`,
+        }
+        return comparison[type];
+    };
+    return { get: getComparisonPhrase };
+})();
 
 
-
-
-
-// Helper functions
-function isValidKey(key, validKeys = Object.keys(userData)){
-    return validKeys.includes(key);
-}
-function convertToInteger(n){
-    if(!n){return};
-    return parseInt(n);
-}
-
-function convertToString(str){
-    if(!str){return};
-    return str.toString();
-}
-    
-    
 const makeComparison = function (compareObj, userObj, objectKey, comparisonUnit){
-    
-    let previouslyUsedKeys = [];
     let comparison = '';
-    let compareObjValue = compareObj[objectKey];
-    let userObjValue = userObj[objectKey];
-    let userFirstName = userObj['name'].split(' ')[0];
     let unit;
     if(objectKey === 'height'){
         unit = comparisonUnit === 'imperial' ? 'inches' : 'centimeters';
     } else if(objectKey === 'weight'){
         unit = comparisonUnit === 'imperial' ? 'lbs' : 'kgs';
     }
-    if(isValidKey(objectKey) && !previouslyUsedKeys.includes(objectKey)){
-        
-        switch(objectKey){
-            case 'species':
-                objectKey = !previouslyUsedKeys.includes('height') ? 'height' : 'diet';
-            case 'height':
-            case 'weight':
-                if(typeof compareObjValue === "string"){compareObjValue = convertToInteger(compareObjValue);}
-                if(typeof userObjValue === "string"){userObjValue = convertToInteger(userObjValue);} 
-                if(compareObjValue > userObjValue){
-                    comparison = `${compareObj.name} ${objectKey} is about 
-                    ${compareObj.height - userObj.height} ${unit} more than ${userFirstName}`
-                    previouslyUsedKeys.push(objectKey);
-                    break;
-                }
-                comparison = `${compareObj.name} ${objectKey} is about 
-                ${userObj.height - compareObj.height} ${unit} less than ${userFirstName}`
-                
-                previouslyUsedKeys.push(objectKey);
-                break;
-            
-            case 'diet':
-            case 'where':
-                if(typeof compareObjValue === "number"){compareObjValue = convertToString(compareObjValue);}
-                if(typeof userObjValue === "number"){userObjValue = convertToString(userObjValue);}
-                
-                if(compareObjValue.toLowerCase() === userObjValue.toLowerCase() 
-                || compareObjValue.toLowerCase().includes(userObjValue.toLowerCase())){
-                    comparison = objectKey === 'diet' ? `${compareObj.name} and ${userFirstName} are both ${userObj.diet}` 
-                    : `${compareObj.name} and ${userFirstName} have ${compareObj.where} in common`
-                    
-                    previouslyUsedKeys.push(objectKey);
-                    break;
-                }
-                comparison = objectKey === 'diet' ? `${compareObj.name} is a ${compareObj.diet} unlike ${userFirstName} the ${userObj.diet}`
-                : `${compareObj.name} location: ${compareObj.where} and ${userFirstName} is: ${userObj.where}`
-                
-                previouslyUsedKeys.push(objectKey);  
-                break;
-            
-            case 'name':
-                if(typeof compareObjValue === "number"){compareObjValue = convertToString(compareObjValue);}
-                if(typeof userObjValue === "number"){userObjValue = convertToString(userObjValue);}
-                if(compareObjValue.toLowerCase() < userObjValue.toLowerCase()){
-                    comparison = `Alphabetically ${compareObj.name} comes before ${userFirstName}`;
-                    
-                    previouslyUsedKeys.push(objectKey); 
-                    break;
-                } else if(compareObjValue.toLowerCase() > userObjValue.toLowerCase()){
-                    comparison = `Alphabetically ${userFirstName} comes before ${compareObj.name}`; 
-
-                    previouslyUsedKeys.push(objectKey); 
-                    break;
-                } else {
-                    comparison = (compareObj.name).length > (userObj.name).length ? `${compareObj.name} name is longer than ${userFirstName}`
-                    : `${compareObj.name} name is not longer than ${userFirstName}`;
-                    
-                    previouslyUsedKeys.push(objectKey);
-                    break;
-                }
-                
-            default:
-                break;
-        }
-    } else {
-        let fact = Math.floor(Math.random() * 5)
-        let when = Math.floor(Math.random() * 5)
-        comparison = fact > when ? `Fact:  ${compareObj.fact}` : `${compareObj.species} lived during the ${compareObj.when} period`;
-                
-        previouslyUsedKeys.push(objectKey);
-    }
+    comparison = compare.get(compareObj, userObj, objectKey, unit);
+ 
     return comparison;
 };
 
     
-    // Insert an item in the middle of an array of any length
+// Insert an item in the middle of an array 
 function arrayMiddleInsert(array, middleItem){
     let middle = Math.floor(array.length / 2);
     array.splice(middle, 0, middleItem);
     return array;
 }
 
-    // Shuffle an array of any length
+// Shuffle an array of any length
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -249,20 +239,27 @@ function shuffleArray(array) {
 
 
 
-    // Generate Tiles for each Dino in Array
+
+
+// Generate Tiles for each Dino in Array
 function generateTileGrid(dino, userObj, unit){
-    let keys = ['species', 'name', 'height', 'weight', 'where'];
+    let keys = ['name', 'height', 'weight', 'diet', 'where'];
+
+    // normalize user height and weight before comparison
+    userObj.height = normalizeHeight(userObj.height, unit);
     let items = arrayMiddleInsert(shuffleArray(dino), userObj);
     items.forEach(item => {
+        let objectKey = shuffleArray(keys)[0];
+         
         if(item instanceof Dinosaur){
-            // TODO: Check for pigeon object
-            let randomKey = shuffleArray(keys)[0];
-            item.setComparisonToHuman(makeComparison(item, userObj, randomKey, unit));
+            item.height = normalizeHeight(item.height, unit);
+            item.weight = normalizeWeight(item.weight, unit);
+            item.setComparisonToHuman(makeComparison(item, userObj, objectKey, unit));
         }
             // create new Grid Item elements
             const gridItem = dom$.create('div', "grid-item", "grid-item");
         
-            // and create title
+            // create title element
             const gridItemTitle = dom$.create('h3');
             const titleText = dom$.textNode(item.name || item.species );
             gridItemTitle.appendChild(titleText);
@@ -282,8 +279,8 @@ function generateTileGrid(dino, userObj, unit){
             // create grid infobox
             const gridItemInfoBox = dom$.create('div', `${(item.species).toLowerCase()}-info`, 'grid-item-info')
             
+            // create and add Height and Weight Information
             let gridItemContent = {
-                // create and add Height + Weight Info
                 heightWeight : `Height: ${item.height}  |  weight: ${item.weight} pounds`,
                 dietLocation : `Diet: ${item.diet}  |  Location: ${item.where}`,
                 timeSpan : `Time Period: ${item.when}`,
@@ -304,7 +301,6 @@ function generateTileGrid(dino, userObj, unit){
           
             // add the newly created element and its content into the DOM
             dom$.get('grid').appendChild(gridItem);
-         
     })
 } 
 
@@ -316,10 +312,6 @@ const formValidation = (function () {
         inches: false,
         weight: false
     }
-
-    // change button to read with a message
-    // Hightlight the input field with a red border
-    // Reset the input to default
     function markInvalid(id){
         let element = dom$.get(id);
         element.className += " form-field_invalid";
@@ -389,9 +381,18 @@ const formValidation = (function () {
 })();
 
 
+// Toggle form units between Imperial and Metric
+dom$.get('unit').onclick = () => {
+    toggleUnitsAndValues(
+        dom$.get('feet').value,
+        dom$.get('inches').value,
+        dom$.get('weight').value,
+        dom$.get('unit').value,
+        ['feet', 'inches', 'weight', 'unit']
+    );
+}
 
-dom$.get('unit').onclick = () => toggleUnitsAndValues();
-
+// Realtime form validation feedback 
 dom$.get('name').onchange = () => formValidation.set('name', dom$.get('name').value)
 dom$.get('weight').onchange = () => formValidation.set('weight', dom$.get('weight').value)
 dom$.get('feet').onchange = () => formValidation.set('feet', dom$.get('feet').value)
@@ -400,7 +401,6 @@ dom$.get('inches').onchange = () => formValidation.set('inches', dom$.get('inche
     
 // On button click, prepare and display infographic
 dom$.get('btn').addEventListener('click', function() {
-    // TODO: add form validation
     // TODO: add toggleButton Fuction - use for compare/reset buttons
     if(formValidation.get(dom$.get('btn'))){
         let formData = {
