@@ -42,10 +42,10 @@ export default (function () {
                     formFields['feet'] = false;
                     formFields['inches'] = false;
                     markInvalid('feet');
-                    markInvalid('inches'); 
+                    markInvalid('inches');
                     return false;
                 };
-                
+
             case 'weight':
                 if(isNaN(value) || value < 1){
                     markInvalid(id);
