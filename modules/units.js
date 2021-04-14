@@ -11,7 +11,7 @@ export function imperialMetricSwap(id, height, weight, unit){
 }
 
 
-export function toggleValues(height, weight, unit, elementIds) { 
+export function toggleValues(height, weight, unit, elementIds) {
     elementIds.forEach( id => {
         dom$.get(id).value = imperialMetricSwap(id, height, weight, unit);
     });
@@ -19,8 +19,8 @@ export function toggleValues(height, weight, unit, elementIds) {
 };
 
 
-//   Toggle the form's displayed units and update the [unit] checkbox value   
-export function toggleUnits(unit) { 
+//   Toggle the form's displayed units and update the [unit] checkbox value
+export function toggleUnits(unit) {
     let isImperial = unit === 'imperial';
     dom$.get('unitLabel').innerText = isImperial ? 'Uncheck for imperial': 'Switch to metric';
     dom$.get('heightLabelFT').innerText = isImperial ? 'Meters: ': 'Feet: ';
@@ -34,13 +34,13 @@ export function reduceToInches(ft, inches){
 }
 
 export function reduceToCentimeters(m, cm){
-    return parseInt(m, 10) * 100 + parseInt(cm, 10)
+    return parseInt(m, 10) * 100 + parseInt(cm, 10);
 }
 
 export function toggleHeight(height, unit){
     if(unit === 'imperial'){
-        return Math.round(parseInt(height, 10) * 2.54)
-    } 
+        return Math.round(parseInt(height, 10) * 2.54);
+    }
     return Math.round(parseInt(height, 10) / 2.54);
 }
 
@@ -73,18 +73,18 @@ export function normalizeHeight(num, unit){
         if(unit !== 'imperial'){
            return height = toggleHeight(parseInt(num), 'imperial');
         }
-      
+
     // Otherwise return the the input value
     return height = parseInt(num);
-    
+
 };
 
 export function normalizeWeight(num, unit){
     let weight;
         // If user is using metric units
         if(unit === 'metric'){
-            return weight =  parseFloat(num) / 2.203;
+            return weight =  (parseFloat(num) / 2.203).toFixed(1);
         }
     // Otherwise return the the input value
-    return weight = parseFloat(num);
+    return weight = parseFloat(num).toFixed(1);
 };
