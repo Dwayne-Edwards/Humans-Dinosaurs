@@ -17,12 +17,12 @@ export default (function() {
         let element = document.createElement(el);
         element.id = id || "";
         element.className = className || "";
-        return element;    
+        return element;
     }
     function createTextNode(content){
         let element = document.createTextNode(content);
         element.createTextNode = content || '';
-        return element;    
+        return element;
     }
 
     return {
