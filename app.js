@@ -1,7 +1,11 @@
 import dinos from './dino.js';
 import dom$ from './modules/domcahce.js';
 import formValidation from './modules/form.js';
-    
+import { toggleUnitsAndValues, normalizeHeight,
+        normalizeWeight } from './modules/units.js';
+
+import { makeComparison } from './modules/compare.js'
+
 // Create Dino Constructor
 function Dinosaur (dino){
     let comparison = null;
@@ -81,146 +85,146 @@ const userData = (function() {
 })();
 
 
-function imperialMetricSwap(id, height, weight, unit){
-    let isImperial = unit === 'imperial';
-    if(id === 'unit'){ return isImperial ? 'metric' : 'imperial'};
-    if(id === 'feet'){ return isImperial ? Math.floor(height / 100) : Math.floor(height / 12)};
-    if(id === 'inches'){ return isImperial ?  Math.floor(height % 100) : Math.floor(height % 12)};
-    if(id === 'weight'){ return isImperial ?  Math.round(weight / 2.203) : Math.round(weight * 2.203)};
-    return;
-}
+// function imperialMetricSwap(id, height, weight, unit){
+//     let isImperial = unit === 'imperial';
+//     if(id === 'unit'){ return isImperial ? 'metric' : 'imperial'};
+//     if(id === 'feet'){ return isImperial ? Math.floor(height / 100) : Math.floor(height / 12)};
+//     if(id === 'inches'){ return isImperial ?  Math.floor(height % 100) : Math.floor(height % 12)};
+//     if(id === 'weight'){ return isImperial ?  Math.round(weight / 2.203) : Math.round(weight * 2.203)};
+//     return;
+// }
 
 
-function toggleValues(height, weight, unit, elementIds) { 
-    elementIds.forEach( id => {
-        dom$.get(id).value = imperialMetricSwap(id, height, weight, unit);
-    });
+// function toggleValues(height, weight, unit, elementIds) { 
+//     elementIds.forEach( id => {
+//         dom$.get(id).value = imperialMetricSwap(id, height, weight, unit);
+//     });
 
-};
-
-
-//   Toggle the form's displayed units and update the [unit] checkbox value   
-function toggleUnits(unit) { 
-    let isImperial = unit === 'imperial';
-    dom$.get('unitLabel').innerText = isImperial ? 'Uncheck for imperial': 'Switch to metric';
-    dom$.get('heightLabelFT').innerText = isImperial ? 'Meters: ': 'Feet: ';
-    dom$.get('heightLabelIN').innerText = isImperial ? 'Cm: ' : 'Inches: ';
-    dom$.get('weightLabel').innerText = isImperial ? 'kgs' : 'lbs';
-};
+// };
 
 
-function reduceToInches(ft, inches){
-    return parseInt(ft, 10) * 12 + parseInt(inches, 10);
-}
+// //   Toggle the form's displayed units and update the [unit] checkbox value   
+// function toggleUnits(unit) { 
+//     let isImperial = unit === 'imperial';
+//     dom$.get('unitLabel').innerText = isImperial ? 'Uncheck for imperial': 'Switch to metric';
+//     dom$.get('heightLabelFT').innerText = isImperial ? 'Meters: ': 'Feet: ';
+//     dom$.get('heightLabelIN').innerText = isImperial ? 'Cm: ' : 'Inches: ';
+//     dom$.get('weightLabel').innerText = isImperial ? 'kgs' : 'lbs';
+// };
 
-function reduceToCentimeters(m, cm){
-    return parseInt(m, 10) * 100 + parseInt(cm, 10)
-}
 
-function toggleHeight(height, unit){
-    if(unit === 'imperial'){
-        return Math.round(parseInt(height, 10) * 2.54)
-    } 
-    return Math.round(parseInt(height, 10) / 2.54);
-}
+// function reduceToInches(ft, inches){
+//     return parseInt(ft, 10) * 12 + parseInt(inches, 10);
+// }
 
-function toggleUnitsAndValues(h1, h2, weight, unit, elementIds){
-    let height = 0;
-    if(unit === 'imperial'){
-        height =  reduceToInches(h1, h2);
-    } else {
-        height = reduceToCentimeters(h1, h2);
-    }
-    toggleValues(toggleHeight(height || 0, unit), weight, unit, elementIds);
-    toggleUnits(unit);
-}
+// function reduceToCentimeters(m, cm){
+//     return parseInt(m, 10) * 100 + parseInt(cm, 10)
+// }
 
-// Normalize the comparing values
-// Imperial is reduced to inches
-// Metric is reduced to centimeters
-function normalizeHeight(num, unit){
-    let height;
-        // If user is using imperial units
-        if(unit === 'imperial' && Array.isArray(num)){
-            return height =  reduceToInches(num[0], num[1]);
-        }
-        // User is using  metric units
-        if(unit !== 'imperial' && Array.isArray(num)){
-            return height =  reduceToCentimeters(num[0], num[1]);
-        }
+// function toggleHeight(height, unit){
+//     if(unit === 'imperial'){
+//         return Math.round(parseInt(height, 10) * 2.54)
+//     } 
+//     return Math.round(parseInt(height, 10) / 2.54);
+// }
 
-        // If values are in imperial and the user is using metric
-        if(unit !== 'imperial'){
-           return height = toggleHeight(parseInt(num), 'imperial');
-        }
+// function toggleUnitsAndValues(h1, h2, weight, unit, elementIds){
+//     let height = 0;
+//     if(unit === 'imperial'){
+//         height =  reduceToInches(h1, h2);
+//     } else {
+//         height = reduceToCentimeters(h1, h2);
+//     }
+//     toggleValues(toggleHeight(height || 0, unit), weight, unit, elementIds);
+//     toggleUnits(unit);
+// }
+
+// // Normalize the comparing values
+// // Imperial is reduced to inches
+// // Metric is reduced to centimeters
+// function normalizeHeight(num, unit){
+//     let height;
+//         // If user is using imperial units
+//         if(unit === 'imperial' && Array.isArray(num)){
+//             return height =  reduceToInches(num[0], num[1]);
+//         }
+//         // User is using  metric units
+//         if(unit !== 'imperial' && Array.isArray(num)){
+//             return height =  reduceToCentimeters(num[0], num[1]);
+//         }
+
+//         // If values are in imperial and the user is using metric
+//         if(unit !== 'imperial'){
+//            return height = toggleHeight(parseInt(num), 'imperial');
+//         }
       
-    // Otherwise return the the input value
-    return height = parseInt(num);
+//     // Otherwise return the the input value
+//     return height = parseInt(num);
     
-};
+// };
 
-function normalizeWeight(num, unit){
-    let weight;
-        // If user is using metric units
-        if(unit === 'metric'){
-            return weight =  parseFloat(num) / 2.203;
-        }
-    // Otherwise return the the input value
-    return weight = parseFloat(num);
-};
+// function normalizeWeight(num, unit){
+//     let weight;
+//         // If user is using metric units
+//         if(unit === 'metric'){
+//             return weight =  parseFloat(num) / 2.203;
+//         }
+//     // Otherwise return the the input value
+//     return weight = parseFloat(num);
+// };
   
 
-const compare = (function(){
-    function getComparisonPhrase (x, y, type, unit){
-        let username = y['name'].split(' ')[0];
-        x.diet = x.diet.toLowerCase();
-        y.diet = y.diet.toLowerCase();
-        x.where = x.where.toLowerCase();
-        y.where = y.where.toLowerCase();
-        let comparison = {   
+// const compare = (function(){
+//     function getComparisonPhrase (x, y, type, unit){
+//         let username = y['name'].split(' ')[0];
+//         x.diet = x.diet.toLowerCase();
+//         y.diet = y.diet.toLowerCase();
+//         x.where = x.where.toLowerCase();
+//         y.where = y.where.toLowerCase();
+//         let comparison = {   
 
-            // weight
-            weight: x.weight > y.weight ? `${x.name} weighs ${x.weight - y.weight } ${unit} more than ${username}` 
-                                        : `${username} weighs ${y.weight - x.weight } ${unit} more than ${x.name}`,
+//             // weight
+//             weight: x.weight > y.weight ? `${x.name} weighs ${x.weight - y.weight } ${unit} more than ${username}` 
+//                                         : `${username} weighs ${y.weight - x.weight } ${unit} more than ${x.name}`,
             
-            // height
-            height: x.height > y.height ? `${x.name} is ${x.height - y.height} ${unit} taller than ${username}`
-                                        : `${username} is ${y.height - x.height} ${unit} taller than ${x.name}`,
+//             // height
+//             height: x.height > y.height ? `${x.name} is ${x.height - y.height} ${unit} taller than ${username}`
+//                                         : `${username} is ${y.height - x.height} ${unit} taller than ${x.name}`,
 
-            // diet
-            diet: x.diet === y.diet ? `${x.name} and ${username} are both ${y.diet}`
-                                    : `${x.name} is ${x.diet} but ${username} is a  ${y.diet}`,
+//             // diet
+//             diet: x.diet === y.diet ? `${x.name} and ${username} are both ${y.diet}`
+//                                     : `${x.name} is ${x.diet} but ${username} is a  ${y.diet}`,
 
-            // location
-            where: x.where === y.where  ? `${x.name}  and ${username} are connected with ${y.where}`
-                                        : `${x.name} location: ${x.where} and ${username} location is ${y.where}`,
+//             // location
+//             where: x.where === y.where  ? `${x.name}  and ${username} are connected with ${y.where}`
+//                                         : `${x.name} location: ${x.where} and ${username} location is ${y.where}`,
 
-            // name - alphabetically ranked a..z
-            name: x.name < username ? `Alphabetically ${x.name} comes before ${username}`
-                                    : `Alphabetically ${username} comes before ${x.name}`,
+//             // name - alphabetically ranked a..z
+//             name: x.name < username ? `Alphabetically ${x.name} comes before ${username}`
+//                                     : `Alphabetically ${username} comes before ${x.name}`,
 
-            // provide a fact or time period as an alternative
-            fact: `${x.fact}`,
-            when: `${x.name} lived during the ${x.when} period`,
-        }
-        return comparison[type];
-    };
-    return { get: getComparisonPhrase };
-})();
+//             // provide a fact or time period as an alternative
+//             fact: `${x.fact}`,
+//             when: `${x.name} lived during the ${x.when} period`,
+//         }
+//         return comparison[type];
+//     };
+//     return { get: getComparisonPhrase };
+// })();
 
 
-const makeComparison = function (compareObj, userObj, objectKey, comparisonUnit){
-    let comparison = '';
-    let unit;
-    if(objectKey === 'height'){
-        unit = comparisonUnit === 'imperial' ? 'inches' : 'centimeters';
-    } else if(objectKey === 'weight'){
-        unit = comparisonUnit === 'imperial' ? 'lbs' : 'kgs';
-    }
-    comparison = compare.get(compareObj, userObj, objectKey, unit);
+// const makeComparison = function (compareObj, userObj, objectKey, comparisonUnit){
+//     let comparison = '';
+//     let unit;
+//     if(objectKey === 'height'){
+//         unit = comparisonUnit === 'imperial' ? 'inches' : 'centimeters';
+//     } else if(objectKey === 'weight'){
+//         unit = comparisonUnit === 'imperial' ? 'lbs' : 'kgs';
+//     }
+//     comparison = compare.get(compareObj, userObj, objectKey, unit);
  
-    return comparison;
-};
+//     return comparison;
+// };
 
     
 // Insert an item in the middle of an array 
