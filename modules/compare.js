@@ -3,17 +3,15 @@ export const compare = (function(){
         let username = y['name'].split(' ')[0];
         x.diet = x.diet.toLowerCase();
         y.diet = y.diet.toLowerCase();
-        x.where = x.where.toLowerCase();
-        y.where = y.where.toLowerCase();
-        let comparison = {   
+        let comparison = {
 
             // weight
-            weight: x.weight > y.weight ? `${x.name} weighs ${x.weight - y.weight } ${unit} more than ${username}` 
-                                        : `${username} weighs ${y.weight - x.weight } ${unit} more than ${x.name}`,
-            
+            weight: x.weight > y.weight ? `${x.name} weighs ${(x.weight - y.weight)} ${unit} more than ${username}`
+                                        : `${username} weighs ${(y.weight - x.weight)} ${unit} more than ${x.name}`,
+
             // height
-            height: x.height > y.height ? `${x.name} is ${x.height - y.height} ${unit} taller than ${username}`
-                                        : `${username} is ${y.height - x.height} ${unit} taller than ${x.name}`,
+            height: x.height > y.height ? `${x.name} is ${(x.height - y.height)} ${unit} taller than ${username}`
+                                        : `${username} is ${(y.height - x.height)} ${unit} taller than ${x.name}`,
 
             // diet
             diet: x.diet === y.diet ? `${x.name} and ${username} are both ${y.diet}`
@@ -46,6 +44,6 @@ export const makeComparison = function (compareObj, userObj, objectKey, comparis
         unit = comparisonUnit === 'imperial' ? 'lbs' : 'kgs';
     }
     comparison = compare.get(compareObj, userObj, objectKey, unit);
- 
+
     return comparison;
 };
