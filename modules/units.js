@@ -1,6 +1,13 @@
 import dom$ from './domcahce.js';
 
-
+/**
+* @description Swaps an input value between metric and imperial
+* @param {string} id - form element value been converted
+* @param {number} height - inches or centimeters
+* @param {number} weight - pounds or kgs
+* @param {string} unit - accepted values:  'imperial' or 'metric'
+* @returns {number} input converted to metric or imperial
+*/
 export function imperialMetricSwap(id, height, weight, unit){
     let isImperial = unit === 'imperial';
     if(id === 'unit'){ return isImperial ? 'metric' : 'imperial'};
@@ -10,12 +17,18 @@ export function imperialMetricSwap(id, height, weight, unit){
     return;
 }
 
-
+/**
+* @description Loop through a list DOM elements by id and call a swapping function to toggle between imperial and metric 
+* @param {number} height - inches or centimeters
+* @param {number} weight - pounds or kgs
+* @param {string} unit - accepted values:  'imperial' or 'metric'
+* @param {array} elementIds - Array of DOM elements ids
+* @returns {}
+*/
 export function toggleValues(height, weight, unit, elementIds) {
     elementIds.forEach( id => {
         dom$.get(id).value = imperialMetricSwap(id, height, weight, unit);
     });
-
 };
 
 
