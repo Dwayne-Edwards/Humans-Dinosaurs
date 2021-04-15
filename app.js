@@ -1,12 +1,14 @@
 import dinos from './dino.js';
 import dom$ from './modules/domcahce.js';
 import formValidation from './modules/form.js';
-import { toggleUnitsAndValues, normalizeHeight,
-        normalizeWeight } from './modules/units.js';
-
+import { toggleUnitsAndValues, normalizeHeight, normalizeWeight } from './modules/units.js';
 import { makeComparison } from './modules/compare.js';
 
-// Create Dino Constructor
+/**
+* @description Represents a Dinosuar
+* @constructor
+* @param {object} dino - The dinosaurs properties
+*/
 function Dinosaur (dino){
     let comparison = null;
     this.species = dino.species || null;
@@ -25,7 +27,10 @@ function Dinosaur (dino){
     }
 }
 
-// Create Dino Objects from import dinosuar array of objects
+/**
+* @description Factory IIFE function for creating new Dinosuars objects
+* @returns {array} array of Dinosaurs objects
+*/
 const Dinosaurs = (function(){
     let dinosaurs = [];
     dinos['Dinos'].forEach(dino => {
@@ -37,8 +42,11 @@ const Dinosaurs = (function(){
 
 
 
-// Create userObj Object and populate properties when [compare button] is clicked
-// Use IIFE to get userObj data from form
+
+/**
+* @description Factory IIFE function for creating human objects from user input data
+* @returns {object} An object containing user input data and a set property to call the set property function
+*/
 const userData = (function() {
     let data = {};
     function set(key, value){
@@ -49,14 +57,23 @@ const userData = (function() {
 })();
 
 
-// Insert an item in the middle of an array
+/**
+* @description Insert an element in the middle of an even array
+* @param {array} array
+* @param {any} middleItem - item to insert
+* @returns {array} an array with the item inserted in the middle
+*/
 function arrayMiddleInsert(array, middleItem){
     let middle = Math.floor(array.length / 2);
     array.splice(middle, 0, middleItem);
     return array;
 }
 
-// Shuffle an array of any length
+/**
+* @description Shuffles the elements of an array
+* @param {array} array
+* @returns {array} the input are randomly shuffled
+*/
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -65,9 +82,12 @@ function shuffleArray(array) {
     return array
 }
 
-
-
-// Generate Tiles for each Dino in Array
+/**
+* @description Generate a 3X3 tile grid with the user data always displayed in the center grid
+* @param {array} dino - array of objects
+* @param {object} userObj - object of user data
+* @param {string} unit - accepted values:  'imperial' or 'metric'
+*/
 function generateTileGrid(dino, userObj, unit){
     let keys = ['name', 'height', 'weight', 'diet', 'where'];
 
@@ -130,8 +150,6 @@ function generateTileGrid(dino, userObj, unit){
     })
 }
 
-
-
 // Toggle form units between Imperial and Metric
 dom$.get('unit').onclick = () => {
     toggleUnitsAndValues(
@@ -151,7 +169,6 @@ dom$.get('inches').onchange = () => formValidation.set('inches', dom$.get('inche
 
 // On button click, prepare and display infographic
 dom$.get('btn').addEventListener('click', function() {
-    // TODO: add toggleButton Fuction - use for compare/reset buttons
     if(formValidation.get(dom$.get('btn'))){
         let formData = {
             species: 'Human',
@@ -162,12 +179,16 @@ dom$.get('btn').addEventListener('click', function() {
             where: dom$.get("where").value,
             fact: "Dinosaurs believe Humans to be the most stupid things"
         }
+
         for (const [key, value] of Object.entries(formData)) {
             userData.set(key, value);
         }
+
         generateTileGrid(Dinosaurs, userData, dom$.get('unit').value)
+
         // Toggle HTML Element diplay property
         dom$.toggle("dino-compare");
+
     } else{
         dom$.get('error-message').className += " form_invalid";
     }
