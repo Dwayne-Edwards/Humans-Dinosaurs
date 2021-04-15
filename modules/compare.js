@@ -1,3 +1,7 @@
+/**
+* @description Compares the values (weight, height, diet, location & name) of two object
+* @returns {object} An interface for getting a summary of a the comparing property
+*/
 export const compare = (function(){
     function getComparisonPhrase (x, y, type, unit){
         let username = y['name'].split(' ')[0];
@@ -34,7 +38,14 @@ export const compare = (function(){
     return { get: getComparisonPhrase };
 })();
 
-
+/**
+* @description make a comparison between two object's property
+* @param {object} compareObj - Dinosaurs data
+* @param {object} userObj - user input data
+* @param {string} objectKey - expected values: imperial || metric
+* @param {string} comparisonUnit - the unit to use in the returned string
+* @returns {string} a summary of a the comparing property of the two objects
+*/
 export const makeComparison = function (compareObj, userObj, objectKey, comparisonUnit){
     let comparison = '';
     let unit;
